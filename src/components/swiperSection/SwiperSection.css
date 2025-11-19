@@ -1,0 +1,68 @@
+.swiper-section {
+    padding: 0 clamp(16px, 4vw, 64px);
+    margin-bottom: 40px;
+}
+
+.swiper-section__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.swiper-section__header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+}
+
+.swiper-section__navigation {
+    display: flex;
+    gap: 8px;
+}
+
+.swiper-section__nav-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 1.5rem;
+}
+
+.swiper-section__nav-btn:hover:not(:disabled) {
+    background-color: rgba(234, 42, 51, 0.6);
+    border-color: rgba(234, 42, 51, 0.6);
+}
+
+.swiper-section__nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.swiper-section__swiper {
+    overflow: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 0, 0, 0.872) transparent;
+}
+
+.swiper-section__slide {
+    width: auto;
+    height: auto;
+}
+
+@media (max-width: 768px) {
+    .swiper-section__nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+    }
+}
+

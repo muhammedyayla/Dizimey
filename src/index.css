@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Spline+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+    --color-primary: #ea2a33;
+    --color-background-dark: #0b0b0d;
+    --color-panel: #17171c;
+    --color-panel-alt: #1f1f26;
+    --color-text: #f7f7f8;
+    --color-muted: rgba(255, 255, 255, 0.65);
+    --color-border: rgba(255, 255, 255, 0.08);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    font-family: 'Spline Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background-color: var(--color-background-dark);
+    color: var(--color-text);
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+.eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    margin: 0;
+}
+
+.button {
+    min-width: 160px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.button--primary {
+    background-color: var(--color-primary);
+    color: #fff;
+}
+
+.button--secondary {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.button:hover {
+    transform: translateY(-2px);
+}

@@ -1,0 +1,117 @@
+.hero-swiper {
+    position: relative;
+    min-height: clamp(480px, 70vh, 720px);
+    border-radius: 28px;
+    margin: 16px clamp(16px, 4vw, 64px) 0;
+    overflow: hidden;
+}
+
+.hero-swiper__swiper {
+    width: 100%;
+    height: 100%;
+    min-height: clamp(480px, 70vh, 720px);
+}
+
+.hero-swiper__slide {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    min-height: clamp(480px, 70vh, 720px);
+}
+
+.hero-swiper__background {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 0.8s ease-in;
+}
+
+.hero-swiper__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(10, 10, 12, 0.95) 75%);
+}
+
+.hero-swiper__content {
+    position: relative;
+    padding: clamp(24px, 6vw, 72px);
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 520px;
+    z-index: 2;
+}
+
+.hero-swiper__content h1 {
+    font-size: clamp(2.5rem, 5vw, 4.5rem);
+    margin: 0;
+    line-height: 1.05;
+}
+
+.hero-swiper__description {
+    color: var(--color-muted);
+    line-height: 1.6;
+}
+
+.hero-swiper__meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--color-muted);
+    font-size: 0.95rem;
+}
+
+.hero-swiper__meta .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    display: inline-flex;
+    margin: 0 6px;
+}
+
+.hero-swiper__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.hero-swiper__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: none;
+    background-color: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background-color 0.2s ease;
+    z-index: 10;
+}
+
+.hero-swiper__nav:hover {
+    background-color: rgba(234, 42, 51, 0.6);
+}
+
+.hero-swiper__nav--prev {
+    left: clamp(5px, 3vw, 5px);
+}
+
+.hero-swiper__nav--next {
+    right: clamp(5px, 3vw, 5px);
+}
+
+@media (max-width: 768px) {
+    .hero-swiper {
+        border-radius: 18px;
+    }
+}
+

@@ -1,0 +1,13 @@
+    Navbar        : Component
+Home              : Page
+    Category      : Component
+    MovieList     : Component
+        MovieCard : Component
+MovieDetail       : Page
+MyList            : Page
+    MovieList     : Component
+        MovieCard : Component
+
+Total: 
+    3 Pages, 
+    4 Components

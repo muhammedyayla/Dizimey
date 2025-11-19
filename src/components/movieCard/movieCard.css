@@ -1,0 +1,130 @@
+.movie-card {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease, filter 0.2s ease;
+    flex-shrink: 0;
+}
+
+.movie-card:hover {
+    transform: translateY(-6px);
+}
+
+.movie-card__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 18px;
+    overflow: hidden;
+    background-color: var(--color-panel);
+}
+
+.movie-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.movie-card__placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.05);
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.movie-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.85) 100%);
+    transition: opacity 0.3s ease;
+}
+
+.movie-card:hover .movie-card__overlay {
+    opacity: 0;
+}
+
+.movie-card__hover-info {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 16px;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.95) 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.movie-card:hover .movie-card__hover-info {
+    opacity: 1;
+}
+
+.movie-card__hover-title {
+    margin: 0 0 8px 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+}
+
+.movie-card__hover-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.movie-card__hover-type {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+.movie-card__hover-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: #ffcb39;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.movie-card__rating {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #ffcb39;
+    font-weight: 600;
+    font-size: 0.85rem;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+.movie-card:hover .movie-card__rating {
+    opacity: 0;
+}
+
+.movie-card__title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+}
+
+@media (max-width: 640px) {
+    .movie-card {
+        width: 44vw;
+    }
+}

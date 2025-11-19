@@ -1,0 +1,244 @@
+.detail-page {
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+    padding: 32px clamp(16px, 5vw, 80px) 80px;
+}
+
+.detail-hero {
+    position: relative;
+    min-height: clamp(360px, 60vh, 640px);
+    border-radius: 32px;
+    overflow: hidden;
+}
+
+.detail-hero__background {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+}
+
+.detail-hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.detail-hero__video-iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100vw;
+    height: 56.25vw;
+    min-height: 100%;
+    min-width: 177.77vh;
+}
+
+.detail-hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, rgba(12, 12, 14, 0.95) 45%, rgba(12, 12, 14, 0.35));
+}
+
+.detail-hero__content {
+    position: relative;
+    padding: clamp(24px, 6vw, 72px);
+    max-width: 540px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.detail-hero h1 {
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    margin: 0;
+}
+
+.detail-hero__logo {
+    max-width: 100%;
+    max-height: 120px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+.detail-hero__description {
+    color: var(--color-muted);
+    line-height: 1.6;
+}
+
+.detail-hero__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--color-muted);
+}
+
+.detail-hero__meta .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.4);
+    display: inline-flex;
+    margin: 0 6px;
+}
+
+.detail-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.detail-content {
+    background-color: var(--color-panel);
+    border-radius: 28px;
+    padding: 32px clamp(16px, 4vw, 48px);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.tabs {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.tabs__item {
+    padding: 12px 18px;
+    border-radius: 999px;
+    border: none;
+    background-color: transparent;
+    color: var(--color-muted);
+    cursor: pointer;
+}
+
+.tabs__item.is-active {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-text);
+}
+
+.detail-body {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 32px;
+}
+
+.detail-body__main h3 {
+    margin-top: 0;
+    font-size: 1.5rem;
+}
+
+.detail-body__text {
+    color: var(--color-muted);
+    line-height: 1.7;
+}
+
+.detail-body__section {
+    margin-top: 32px;
+}
+
+.cast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.cast-card {
+    background-color: var(--color-panel-alt);
+    border-radius: 20px;
+    padding: 16px;
+    text-align: center;
+}
+
+.cast-card__avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.1);
+    background-size: cover;
+    background-position: center;
+    margin: 0 auto 12px;
+}
+
+.cast-card__name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.cast-card__role {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+}
+
+.detail-body__side {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    background-color: var(--color-panel-alt);
+    border-radius: 24px;
+    padding: 24px;
+}
+
+.detail-body__side h4 {
+    margin: 0 0 4px;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.rating-pill {
+    display: inline-flex;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background-color: var(--color-primary);
+}
+
+.detail-recommendations {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 0 clamp(16px, 4vw, 64px);
+}
+
+.recommendations-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 18px;
+}
+
+.recommend-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recommend-card__media {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 18px;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 10px;
+}
+
+@media (max-width: 1024px) {
+    .detail-body {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .detail-hero {
+        border-radius: 20px;
+    }
+}
+
