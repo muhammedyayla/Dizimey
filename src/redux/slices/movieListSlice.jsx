@@ -1,10 +1,12 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios'
-import { API_KEY, API_MOVIE_LIST_URL, API_MOVIE_TOP_RATED_URL } from '../../constants/api'
+import { API_KEY, API_MOVIE_LIST_URL, API_MOVIE_TOP_RATED_URL, API_TV_TOP_RATED_URL, API_TRENDING_URL } from '../../constants/api'
 
 const initialState = {
     movieList: [],
-    topRatedMovies: []
+    topRatedMovies: [],
+    topRatedTv: [],
+    trending: []
 }
 
 const LANGUAGE_TR = 'tr-TR'
@@ -48,6 +50,32 @@ export const getTopRatedMovies = createAsyncThunk('topRatedMovies', async () => 
     return mergeMovieData(trRes.data.results, enRes.data.results)
 })
 
+export const getTopRatedTv = createAsyncThunk('topRatedTv', async () => {
+    const [trRes, enRes] = await Promise.all([
+        axios.get(`${API_TV_TOP_RATED_URL}?api_key=${API_KEY}&language=${LANGUAGE_TR}`),
+        axios.get(`${API_TV_TOP_RATED_URL}?api_key=${API_KEY}&language=${LANGUAGE_EN}`)
+    ])
+    return mergeMovieData(trRes.data.results, enRes.data.results)
+})
+
+export const getTrending = createAsyncThunk('trending', async () => {
+    const [trRes, enRes] = await Promise.all([
+        axios.get(`${API_TRENDING_URL}/week?api_key=${API_KEY}&language=${LANGUAGE_TR}`),
+        axios.get(`${API_TRENDING_URL}/week?api_key=${API_KEY}&language=${LANGUAGE_EN}`)
+    ])
+    const enMap = new Map(enRes.data.results.map(m => [m.id, m]))
+    return trRes.data.results.map(trItem => {
+        const enItem = enMap.get(trItem.id)
+        return {
+            ...trItem,
+            original_title: enItem?.original_title || trItem.original_title || trItem.title,
+            original_name: enItem?.original_name || trItem.original_name || trItem.name,
+            title: enItem?.title || trItem.title,
+            name: enItem?.name || trItem.name
+        }
+    })
+})
+
 export const movieListSlice = createSlice({
     name: "movieList",
     initialState,
@@ -63,6 +91,12 @@ export const movieListSlice = createSlice({
         })
         builder.addCase(getTopRatedMovies.fulfilled, (state, action) => {
             state.topRatedMovies = action.payload;
+        })
+        builder.addCase(getTopRatedTv.fulfilled, (state, action) => {
+            state.topRatedTv = action.payload;
+        })
+        builder.addCase(getTrending.fulfilled, (state, action) => {
+            state.trending = action.payload;
         })
     }
 })

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import './genres.css'
+import Tabs from '../tabs/Tabs'
 import { getGenres } from '../../redux/slices/genreSlice'
 import { useDispatch, useSelector } from 'react-redux'
 
@@ -15,9 +16,12 @@ const Genres = ({ setSelectedGenre}) => {
   
   const [activeGenre, setActiveGenre] = useState(null)
 
-  const handleGenre = (genre) => {
-    setSelectedGenre(genre)
-    setActiveGenre(genre.id)
+  const handleGenre = (genreId) => {
+    const genre = genres.find(g => g.id === genreId)
+    if (genre) {
+      setSelectedGenre(genre)
+      setActiveGenre(genre.id)
+    }
   }
 
   // İlk genre'yi otomatik seç
@@ -34,21 +38,20 @@ const Genres = ({ setSelectedGenre}) => {
 
   let filteredGenres = genres.filter((genre) => {
     return genre.id !== 10749 && genre.id !== 18;
-  })  
+  })
+
+  const tabs = filteredGenres.map(genre => ({
+    value: genre.id,
+    label: genre.name
+  }))
 
   return (
     <div className='genres'>
-        <ul>
-            {filteredGenres?.map((genre, index) => (
-              <li
-                className={`genre ${genre.id === activeGenre ? 'active' : ''}`}
-                onClick={() => handleGenre(genre)}
-                key={genre.id + index}
-              >
-                {genre.name}
-              </li>
-            ))}
-        </ul>
+      <Tabs
+        value={activeGenre}
+        onChange={handleGenre}
+        tabs={tabs}
+      />
     </div>
   )
 }

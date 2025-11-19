@@ -6,7 +6,8 @@ import MovieCard from '../../components/movieCard/movieCard'
 import Loading from '../../components/Loading/Loading'
 import { API_KEY } from '../../constants/api'
 
-const LANGUAGE = 'tr-TR'
+const LANGUAGE_TR = 'tr-TR'
+const LANGUAGE_EN = 'en-US'
 const MAX_RESULTS_PER_PAGE = 20
 
 const Search = () => {
@@ -30,21 +31,48 @@ const Search = () => {
       setLoading(true)
       setError(null)
       try {
-        const res = await axios.get('https://api.themoviedb.org/3/search/multi', {
-          params: {
-            api_key: API_KEY,
-            language: LANGUAGE,
-            query,
-            include_adult: false,
-            page: currentPage,
-          },
-        })
+        const [trRes, enRes] = await Promise.all([
+          axios.get('https://api.themoviedb.org/3/search/multi', {
+            params: {
+              api_key: API_KEY,
+              language: LANGUAGE_TR,
+              query,
+              include_adult: false,
+              page: currentPage,
+            },
+          }),
+          axios.get('https://api.themoviedb.org/3/search/multi', {
+            params: {
+              api_key: API_KEY,
+              language: LANGUAGE_EN,
+              query,
+              include_adult: false,
+              page: currentPage,
+            },
+          })
+        ])
 
-        const filtered = (res.data.results || []).filter((item) =>
+        const trFiltered = (trRes.data.results || []).filter((item) =>
           ['movie', 'tv'].includes(item.media_type)
         )
-        setResults(filtered)
-        setTotalPages(Math.min(res.data.total_pages, 50))
+        const enFiltered = (enRes.data.results || []).filter((item) =>
+          ['movie', 'tv'].includes(item.media_type)
+        )
+
+        const enMap = new Map(enFiltered.map(m => [`${m.media_type}-${m.id}`, m]))
+        const merged = trFiltered.map(trItem => {
+          const enItem = enMap.get(`${trItem.media_type}-${trItem.id}`)
+          return {
+            ...trItem,
+            title: enItem?.title || trItem.title,
+            name: enItem?.name || trItem.name,
+            original_title: enItem?.original_title || trItem.original_title,
+            original_name: enItem?.original_name || trItem.original_name
+          }
+        })
+
+        setResults(merged)
+        setTotalPages(Math.min(trRes.data.total_pages, 50))
       } catch (err) {
         setError('Arama yapılırken bir hata oluştu.')
         console.error(err)

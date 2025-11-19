@@ -3,19 +3,21 @@ import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Navigation, EffectFade } from 'swiper/modules'
 import { MdChevronLeft, MdChevronRight, MdInfoOutline, MdPlayArrow } from 'react-icons/md'
 import { Link } from 'react-router-dom'
-import { API_IMG } from '../../constants/api'
+import { API_IMG, API_MOVIE_IMAGES_URL, API_TV_IMAGES_URL, API_KEY } from '../../constants/api'
+import axios from 'axios'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import 'swiper/css/effect-fade'
 import './HeroSwiper.css'
 
 const getEnglishTitle = (item) =>
-  item?.original_title || item?.original_name || item?.title || item?.name || ''
+  item?.title || item?.name || item?.original_title || item?.original_name || ''
 
 const HeroSwiper = ({ movies, genres }) => {
   const [swiper, setSwiper] = useState(null)
   const prevRef = useRef(null)
   const nextRef = useRef(null)
+  const [logos, setLogos] = useState({})
 
   useEffect(() => {
     if (swiper && prevRef.current && nextRef.current) {
@@ -32,6 +34,33 @@ const HeroSwiper = ({ movies, genres }) => {
       return acc
     }, {})
   }, [genres])
+
+  useEffect(() => {
+    const fetchLogos = async () => {
+      const logoPromises = movies.map(async (movie) => {
+        if (!movie.id) return null
+        try {
+          const mediaType = movie.media_type || (movie.first_air_date ? 'tv' : 'movie')
+          const imagesUrl = mediaType === 'tv' ? `${API_TV_IMAGES_URL}/${movie.id}/images` : `${API_MOVIE_IMAGES_URL}/${movie.id}/images`
+          const res = await axios.get(`${imagesUrl}?api_key=${API_KEY}`)
+          const logo = res.data.logos?.find((logo) => logo.iso_639_1 === 'en') || res.data.logos?.[0]
+          return { id: movie.id, logoPath: logo?.file_path }
+        } catch (error) {
+          console.error(`Logo yüklenirken hata (${movie.id}):`, error)
+          return { id: movie.id, logoPath: null }
+        }
+      })
+      const results = await Promise.all(logoPromises)
+      const logosMap = results.reduce((acc, result) => {
+        if (result) acc[result.id] = result.logoPath
+        return acc
+      }, {})
+      setLogos(logosMap)
+    }
+    if (movies.length > 0) {
+      fetchLogos()
+    }
+  }, [movies])
 
   const renderBackdrop = (movie) => {
     if (!movie) return ''
@@ -84,7 +113,11 @@ const HeroSwiper = ({ movies, genres }) => {
               />
               <div className='hero-swiper__overlay' />
               <div className='hero-swiper__content'>
-                <h1>{getEnglishTitle(movie) || 'Dizimey Originals'}</h1>
+                {logos[movie.id] ? (
+                  <img src={`${API_IMG}/${logos[movie.id]}`} alt={getEnglishTitle(movie)} className='hero-swiper__logo' />
+                ) : (
+                  <h1>{getEnglishTitle(movie) || 'Dizimey Originals'}</h1>
+                )}
                 <p className='hero-swiper__description'>
                   {movie?.overview ||
                     'En popüler film ve dizileri izlemek için hazır olun. Keşfetmeye başlamak için aşağı kaydırın.'}
@@ -101,13 +134,13 @@ const HeroSwiper = ({ movies, genres }) => {
                 )}
                 <div className='hero-swiper__actions'>
                   {movie && (
-                    <Link to={`/${movie.id}`} className='button button--primary'>
+                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/${movie.id}`} className='button button--primary'>
                       <MdPlayArrow aria-hidden='true' />
                       Oynat
                     </Link>
                   )}
                   {movie && (
-                    <Link to={`/${movie.id}`} className='button button--secondary'>
+                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/${movie.id}`} className='button button--secondary'>
                       <MdInfoOutline aria-hidden='true' />
                       Daha Fazla Bilgi
                     </Link>

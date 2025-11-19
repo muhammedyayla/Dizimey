@@ -78,8 +78,8 @@ const MovieDetail = () => {
 
   const mediaType = 'movie'
   const displayTitle =
-    movieDetail?.original_title ||
     movieDetail?.title ||
+    movieDetail?.original_title ||
     'Yükleniyor...'
 
   const handleFavorite = () => {
@@ -229,7 +229,7 @@ const MovieDetail = () => {
           {similar.length ? (
             similar.map((item) => {
               const itemPath = item.media_type === 'tv' ? `/tv/${item.id}` : `/${item.id}`
-              const itemTitle = item.original_title || item.original_name || item.title || item.name
+              const itemTitle = item.title || item.name || item.original_title || item.original_name
               return (
                 <Link key={item.id} to={itemPath} className='recommend-card'>
                   <div

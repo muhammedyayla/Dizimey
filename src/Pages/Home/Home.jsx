@@ -4,21 +4,23 @@ import Genres from '../../components/genres/genres'
 import MovieCard from '../../components/movieCard/movieCard'
 import SwiperSection from '../../components/swiperSection/SwiperSection'
 import HeroSwiper from '../../components/heroSwiper/HeroSwiper'
+import Tabs from '../../components/tabs/Tabs'
 import { useDispatch, useSelector } from 'react-redux'
-import { getMovieList, getMovieListByGenre, getTopRatedMovies } from '../../redux/slices/movieListSlice'
+import { getMovieList, getMovieListByGenre, getTopRatedMovies, getTopRatedTv, getTrending } from '../../redux/slices/movieListSlice'
 import { API_IMG } from '../../constants/api'
 import Loading from '../../components/Loading/Loading'
 import { Link } from 'react-router-dom'
 
 const getEnglishTitle = (item) =>
-  item?.original_title || item?.original_name || item?.title || item?.name || ''
+  item?.title || item?.name || item?.original_title || item?.original_name || ''
 
 const Home = () => {
   const dispatch = useDispatch()
-  const { movieList, topRatedMovies } = useSelector((store) => store.movieList)
+  const { movieList, topRatedMovies, topRatedTv, trending } = useSelector((store) => store.movieList)
   const { genres } = useSelector((store) => store.genre)
   const [selectedGenre, setSelectedGenre] = useState(null)
   const [isFetching, setIsFetching] = useState(false)
+  const [topRatedTab, setTopRatedTab] = useState('movies')
 
   useEffect(() => {
     let isMounted = true
@@ -46,11 +48,14 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(getTopRatedMovies())
+    dispatch(getTopRatedTv())
+    dispatch(getTrending())
   }, [dispatch])
 
-  const featuredMovies = useMemo(() => movieList.slice(0, 10), [movieList])
+  const featuredMovies = useMemo(() => trending.slice(0, 10), [trending])
   const topTen = useMemo(() => movieList.slice(0, 10), [movieList])
   const trendingNow = useMemo(() => movieList.slice(10, 16), [movieList])
+  const topRatedList = useMemo(() => topRatedTab === 'movies' ? topRatedMovies : topRatedTv, [topRatedTab, topRatedMovies, topRatedTv])
 
   return (
     <div className='home'>
@@ -81,17 +86,30 @@ const Home = () => {
         ))}
       </SwiperSection>
 
-      <SwiperSection title="Top Rated Movies" slidesPerView="auto" spaceBetween={16}>
-        {topRatedMovies.length > 0 ? (
-          topRatedMovies.slice(0, 20).map((movie) => (
-            <MovieCard key={movie.id} movie={{ ...movie, media_type: 'movie' }} />
-          ))
-        ) : (
-          <div className='state'>
-            <Loading />
-          </div>
-        )}
-      </SwiperSection>
+      <section className='top-rated-section'>
+        <div className='top-rated-section__header'>
+          <h3>Top Rated</h3>
+          <Tabs
+            value={topRatedTab}
+            onChange={setTopRatedTab}
+            tabs={[
+              { value: 'movies', label: 'Movies' },
+              { value: 'tv', label: 'TV Series' }
+            ]}
+          />
+        </div>
+        <SwiperSection title="" slidesPerView="auto" spaceBetween={16}>
+          {topRatedList.length > 0 ? (
+            topRatedList.slice(0, 20).map((item) => (
+              <MovieCard key={item.id} movie={{ ...item, media_type: topRatedTab === 'movies' ? 'movie' : 'tv' }} />
+            ))
+          ) : (
+            <div className='state'>
+              <Loading />
+            </div>
+          )}
+        </SwiperSection>
+      </section>
 
       <Genres setSelectedGenre={setSelectedGenre} />
 

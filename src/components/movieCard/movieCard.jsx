@@ -8,7 +8,7 @@ const MovieCard = ({ movie }) => {
   const { id, vote_average, poster_path, media_type } = movie
   const rating = vote_average ? vote_average.toFixed(1) : '—'
   const displayTitle =
-    movie?.original_title || movie?.original_name || movie?.title || movie?.name || 'İsimsiz İçerik'
+    movie?.title || movie?.name || movie?.original_title || movie?.original_name || 'İsimsiz İçerik'
   const imageSrc = poster_path ? `${API_IMG}/${poster_path}` : ''
   const mediaTypeLabel = media_type === 'tv' ? 'TV Show' : 'Movie'
   

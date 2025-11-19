@@ -59,9 +59,6 @@ const Navbar = () => {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </form>
-        <button className='ghost-button' aria-label='Bildirimler'>
-          <MdNotificationsNone />
-        </button>
         <div
           className='top-nav__avatar'
           role='img'

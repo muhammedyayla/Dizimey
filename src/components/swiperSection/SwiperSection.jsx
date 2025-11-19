@@ -24,28 +24,28 @@ const SwiperSection = ({ title, children, slidesPerView = 'auto', spaceBetween =
     <section className='swiper-section'>
       <div className='swiper-section__header'>
         <h3>{title}</h3>
-        <div className='swiper-section__navigation'>
-          <button ref={prevRef} className='swiper-section__nav-btn swiper-section__nav-btn--prev' aria-label='Önceki'>
-            <MdChevronLeft />
-          </button>
-          <button ref={nextRef} className='swiper-section__nav-btn swiper-section__nav-btn--next' aria-label='Sonraki'>
-            <MdChevronRight />
-          </button>
-        </div>
       </div>
-      <Swiper
-        modules={[Navigation]}
-        spaceBetween={spaceBetween}
-        slidesPerView={slidesPerView}
-        onSwiper={setSwiper}
-        className='swiper-section__swiper'
-      >
-        {React.Children.map(children, (child, index) => (
-          <SwiperSlide key={index} className='swiper-section__slide'>
-            {child}
-          </SwiperSlide>
-        ))}
-      </Swiper>
+      <div className='swiper-section__container'>
+        <button ref={prevRef} className='swiper-section__nav-btn swiper-section__nav-btn--prev' aria-label='Önceki'>
+          <MdChevronLeft />
+        </button>
+        <Swiper
+          modules={[Navigation]}
+          spaceBetween={spaceBetween}
+          slidesPerView={slidesPerView}
+          onSwiper={setSwiper}
+          className='swiper-section__swiper'
+        >
+          {React.Children.map(children, (child, index) => (
+            <SwiperSlide key={index} className='swiper-section__slide'>
+              {child}
+            </SwiperSlide>
+          ))}
+        </Swiper>
+        <button ref={nextRef} className='swiper-section__nav-btn swiper-section__nav-btn--next' aria-label='Sonraki'>
+          <MdChevronRight />
+        </button>
+      </div>
     </section>
   )
 }

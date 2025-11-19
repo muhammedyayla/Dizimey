@@ -89,7 +89,7 @@ const SeriesDetail = () => {
     fetchEpisodes()
   }, [id, selectedSeason])
 
-  const displayTitle = tvDetail?.original_name || tvDetail?.name || 'Yükleniyor...'
+  const displayTitle = tvDetail?.name || tvDetail?.original_name || 'Yükleniyor...'
 
   const handleFavorite = () => {
     if (!tvDetail) return

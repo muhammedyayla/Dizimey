@@ -4,9 +4,6 @@
 }
 
 .swiper-section__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
     margin-bottom: 18px;
 }
 
@@ -15,9 +12,11 @@
     font-size: 1.4rem;
 }
 
-.swiper-section__navigation {
+.swiper-section__container {
+    position: relative;
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 12px;
 }
 
 .swiper-section__nav-btn {
@@ -32,6 +31,8 @@
     cursor: pointer;
     transition: all 0.2s ease;
     font-size: 1.5rem;
+    flex-shrink: 0;
+    z-index: 2;
 }
 
 .swiper-section__nav-btn:hover:not(:disabled) {
@@ -51,6 +52,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 0, 0, 0.872) transparent;
+    flex: 1;
 }
 
 .swiper-section__slide {
