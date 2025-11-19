@@ -139,12 +139,6 @@ const HeroSwiper = ({ movies, genres }) => {
                       Oynat
                     </Link>
                   )}
-                  {movie && (
-                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/${movie.id}`} className='button button--secondary'>
-                      <MdInfoOutline aria-hidden='true' />
-                      Daha Fazla Bilgi
-                    </Link>
-                  )}
                 </div>
               </div>
             </SwiperSlide>

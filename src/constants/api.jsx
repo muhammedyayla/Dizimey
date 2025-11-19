@@ -10,5 +10,5 @@ export const API_TV_VIDEOS_URL = `https://api.themoviedb.org/3/tv`
 export const API_MOVIE_IMAGES_URL = `https://api.themoviedb.org/3/movie`
 export const API_TV_IMAGES_URL = `https://api.themoviedb.org/3/tv`
 
-export const API_KEY = `8b0df767335a475bf7c6262444c31d24`
+export const API_KEY = import.meta.env.VITE_API_KEY || `8b0df767335a475bf7c6262444c31d24`
 export const API_IMG = `https://image.tmdb.org/t/p/original`

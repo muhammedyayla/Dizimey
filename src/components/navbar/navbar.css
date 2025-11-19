@@ -117,6 +117,14 @@
     border-radius: 14px;
     background-size: cover;
     background-position: center;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.top-nav__avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px rgba(234, 42, 51, 0.3);
 }
 
 @media (max-width: 1024px) {

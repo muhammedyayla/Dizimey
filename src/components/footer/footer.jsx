@@ -6,7 +6,7 @@ const Footer = () => {
     <footer className='footer'>
       <div className='footer__content'>
         <p className='footer__text'>
-          <strong>Dizimey</strong> This site does not store any files on our server, we only linked to the media which is hosted on 3rd party services.
+          <strong>Dizimey</strong> Bu site herhangi bir dosyayı sunucumuzda saklamaz, sadece 3. taraf hizmetlerinde barındırılan medyayı bağlar.
         </p>
         <a href='mailto:contact@dizimey.com' className='footer__link'>
           contact@dizimey.com

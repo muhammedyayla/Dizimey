@@ -61,7 +61,7 @@ const Home = () => {
     <div className='home'>
       <HeroSwiper movies={featuredMovies} genres={genres} />
 
-      <SwiperSection title="Bugünün Top 10 Türkiye'de" slidesPerView="auto" spaceBetween={16}>
+      <SwiperSection title="Türkiye'de bu haftanın Top 10 Filmleri" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
           <Link key={movie.id} to={`/${movie.id}`} className='top-rank-card'>
             <span className='top-rank-card__number'>{index + 1}</span>
@@ -73,7 +73,7 @@ const Home = () => {
         ))}
       </SwiperSection>
 
-      <SwiperSection title="Bugün Trend Olanlar" slidesPerView="auto" spaceBetween={16}>
+      <SwiperSection title="Bu Haftanın Trend Olanları" slidesPerView="auto" spaceBetween={16}>
         {trendingNow.map((movie) => (
           <Link key={movie.id} to={`/${movie.id}`} className='trend-card'>
             <div
@@ -88,7 +88,7 @@ const Home = () => {
 
       <section className='top-rated-section'>
         <div className='top-rated-section__header'>
-          <h3>Top Rated</h3>
+          <h3>En Yüksek Puanlılar</h3>
           <Tabs
             value={topRatedTab}
             onChange={setTopRatedTab}
