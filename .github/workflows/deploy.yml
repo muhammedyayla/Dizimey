@@ -57,7 +57,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-files
-          path: ./dist
+          path: .   # <---- ÖNEMLİ DÜZELTME
 
       - name: Deploy to GitHub Pages
         id: deployment
