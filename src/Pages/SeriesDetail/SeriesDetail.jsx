@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getTvById, getTvSeasonEpisodes } from '../../redux/slices/tvDetailSlice'
 import { API_IMG, API_TV_FIND_URL, API_TV_VIDEOS_URL, API_TV_IMAGES_URL, API_KEY } from '../../constants/api'
-import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
+import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../../redux/slices/watchlistSlice'
 import { MdPlayArrow, MdAdd, MdCheck, MdSearch, MdDownload } from 'react-icons/md'
 import PlayerModal from '../../components/player/PlayerModal'
 import axios from 'axios'
@@ -13,7 +13,7 @@ const SeriesDetail = () => {
   const { id } = useParams()
   const dispatch = useDispatch()
   const { tvDetail } = useSelector((store) => store.tvDetail)
-  const { movies } = useSelector((store) => store.favorite)
+  const { items: watchlist } = useSelector((store) => store.watchlist)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState(1)
@@ -61,9 +61,13 @@ const SeriesDetail = () => {
   }, [id])
 
   useEffect(() => {
-    const exists = movies?.some((movie) => String(movie.id) === String(id))
+    dispatch(fetchWatchlist())
+  }, [dispatch])
+
+  useEffect(() => {
+    const exists = watchlist?.some((item) => String(item.tmdb_id) === String(id) && item.media_type === 'tv')
     setIsFavorite(Boolean(exists))
-  }, [movies, id])
+  }, [watchlist, id])
 
   useEffect(() => {
     if (tvDetail?.seasons?.length > 0) {
@@ -91,20 +95,29 @@ const SeriesDetail = () => {
 
   const displayTitle = tvDetail?.name || tvDetail?.original_name || 'Yükleniyor...'
 
-  const handleFavorite = () => {
+  const handleFavorite = async () => {
     if (!tvDetail) return
+    const token = localStorage.getItem('token')
+    
+    if (!token) {
+      alert('Lütfen önce giriş yapın')
+      return
+    }
 
     if (isFavorite) {
-      dispatch(removeFromFavorite({ id }))
+      await dispatch(removeFromWatchlist({ tmdbId: tvDetail.id, mediaType: 'tv' }))
+      setIsFavorite(false)
     } else {
-      dispatch(
-        addToFavorite({
+      await dispatch(
+        addToWatchlist({
           id: tvDetail.id,
+          media_type: 'tv',
           title: tvDetail.name,
           vote_average: tvDetail.vote_average,
           poster_path: tvDetail.poster_path,
         })
       )
+      setIsFavorite(true)
     }
   }
 
@@ -319,15 +332,17 @@ const SeriesDetail = () => {
         </div>
       </section>
 
-      <PlayerModal
-        open={isPlayerOpen}
-        onClose={() => setIsPlayerOpen(false)}
-        mediaType='tv'
-        tmdbId={tvDetail?.id}
-        title={displayTitle}
-        season={selectedEpisode.season}
-        episode={selectedEpisode.episode}
-      />
+            <PlayerModal
+              open={isPlayerOpen}
+              onClose={() => setIsPlayerOpen(false)}
+              mediaType='tv'
+              tmdbId={tvDetail?.id}
+              title={displayTitle}
+              season={selectedEpisode.season}
+              episode={selectedEpisode.episode}
+              posterPath={tvDetail?.poster_path}
+              backdropPath={tvDetail?.backdrop_path}
+            />
     </div>
   )
 }

@@ -1,21 +1,83 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './navbar.css'
 import { HOME, MY_LIST, SEARCH } from '../../constants/path'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { MdNotificationsNone, MdSearch } from 'react-icons/md'
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchWatchlist } from '../../redux/slices/watchlistSlice'
+import { MdSearch } from 'react-icons/md'
 import AuthModal from '../authModal/AuthModal'
+import UserMenu from '../userMenu/UserMenu'
+import axios from 'axios'
 
 const navLinks = [
   { label: 'Ana Sayfa', to: HOME },
   { label: 'İzleme Listem', to: MY_LIST, hasBadge: true },
 ]
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+
 const Navbar = () => {
-  const { movies } = useSelector((store) => store.favorite)
+  const dispatch = useDispatch()
+  const watchlist = useSelector((store) => store.watchlist?.items || [])
+  const token = localStorage.getItem('token')
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [user, setUser] = useState(null)
+  const [checkingAuth, setCheckingAuth] = useState(true)
   const navigate = useNavigate()
+
+  // Check if user is logged in and fetch user info
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = localStorage.getItem('token')
+      const storedUser = localStorage.getItem('user')
+
+      if (token && storedUser) {
+        try {
+          // Verify token and get fresh user data
+          const res = await axios.get(`${API_BASE_URL}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (res.data.success) {
+            setUser(res.data.user)
+            localStorage.setItem('user', JSON.stringify(res.data.user))
+          } else {
+            // Token invalid, clear storage
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            setUser(null)
+          }
+        } catch (error) {
+          console.error('Auth check error:', error)
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          setUser(null)
+        }
+      }
+
+      // Check if user needs to complete signup
+      const oauthSessionId = sessionStorage.getItem('oauth_sessionId')
+      if (oauthSessionId && !user) {
+        setIsAuthModalOpen(true)
+      }
+
+      setCheckingAuth(false)
+    }
+
+    checkAuth()
+  }, [])
+
+  // Fetch watchlist when user logs in
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (token && user) {
+      dispatch(fetchWatchlist())
+    }
+  }, [user, dispatch])
+
+  const handleLogout = () => {
+    setUser(null)
+  }
 
   const handleSearch = (event) => {
     event.preventDefault()
@@ -44,8 +106,8 @@ const Navbar = () => {
             className={`top-nav__link ${item.disabled ? 'is-disabled' : ''}`}
           >
             <span>{item.label}</span>
-            {item.hasBadge && movies.length > 0 && (
-              <span className='top-nav__badge'>{movies.length}</span>
+            {item.hasBadge && watchlist.length > 0 && (
+              <span className='top-nav__badge'>{watchlist.length}</span>
             )}
           </Link>
         ))}
@@ -61,17 +123,29 @@ const Navbar = () => {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
         </form>
-        <button
-          className='top-nav__avatar'
-          type='button'
-          onClick={() => setIsAuthModalOpen(true)}
-          aria-label='Kullanıcı profili'
-          style={{
-            backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVw_hT6dP2uQzNvRC1iuCpkV6vqszaZkgWJm8e5O8R5jz4gQUmnd1SGtp1UZ4kbsYJJWySCJn3lyhRVX3dKJ-UbvsxHieiazRuCjN1u3btHJL0Zq8St6EAIX_Of77qJkOKij0_xtDQ_SURgiFVF6isUJmYs53mooKIJWrYzqvZq8hPMeSDaJUEShBe-3rIGC0QyOtoK2EERX9kZKtNSp3qEAMZa5raQPFWEHvf8P7TY0iv4orth_IeMjjZQ4apa8b6S6Er6B2pZ7g")`,
-          }}
-        />
+        {user ? (
+          <UserMenu user={user} onLogout={handleLogout} />
+        ) : (
+          <button
+            className='top-nav__avatar'
+            type='button'
+            onClick={() => setIsAuthModalOpen(true)}
+            aria-label='Kullanıcı profili'
+            style={{
+              backgroundImage: `url("https://lh3.googleusercontent.com/aida-public/AB6AXuCVw_hT6dP2uQzNvRC1iuCpkV6vqszaZkgWJm8e5O8R5jz4gQUmnd1SGtp1UZ4kbsYJJWySCJn3lyhRVX3dKJ-UbvsxHieiazRuCjN1u3btHJL0Zq8St6EAIX_Of77qJkOKij0_xtDQ_SURgiFVF6isUJmYs53mooKIJWrYzqvZq8hPMeSDaJUEShBe-3rIGC0QyOtoK2EERX9kZKtNSp3qEAMZa5raQPFWEHvf8P7TY0iv4orth_IeMjjZQ4apa8b6S6Er6B2pZ7g")`,
+            }}
+          />
+        )}
       </div>
-      <AuthModal open={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
+      <AuthModal 
+        open={isAuthModalOpen} 
+        onClose={() => {
+          setIsAuthModalOpen(false)
+          // Clear OAuth session if modal closed without completing
+          sessionStorage.removeItem('oauth_token')
+          sessionStorage.removeItem('oauth_sessionId')
+        }}
+      />
     </header>
   )
 }

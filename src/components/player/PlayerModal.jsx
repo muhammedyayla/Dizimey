@@ -1,4 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useDispatch } from 'react-redux'
+import { updateWatchProgress } from '../../redux/slices/watchProgressSlice'
 import './playerModal.css'
 
 const BRAND_COLOR = 'ea2a33'
@@ -24,21 +26,58 @@ const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
   return `${base}?${params.toString()}`
 }
 
-const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season: initialSeason, episode: initialEpisode }) => {
+const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season: initialSeason, episode: initialEpisode, posterPath, backdropPath }) => {
+  const dispatch = useDispatch()
   const [season, setSeason] = useState(initialSeason || 1)
   const [episode, setEpisode] = useState(initialEpisode || 1)
   const [lastEvent, setLastEvent] = useState(null)
+  const [totalDuration, setTotalDuration] = useState(0)
+  const [currentTime, setCurrentTime] = useState(0)
 
   useEffect(() => {
     if (!open) return undefined
 
-    const handleMessage = (event) => {
+    const handleMessage = async (event) => {
       if (typeof event.data !== 'string') return
       try {
         const payload = JSON.parse(event.data)
         if (payload?.type === 'PLAYER_EVENT') {
           setLastEvent(payload.data)
-          localStorage.setItem(`player-progress-${tmdbId}`, JSON.stringify(payload.data))
+          
+          const eventData = payload.data
+          // VidKing player sends progress as percentage (0-100)
+          const progressPercent = eventData.progress || 0
+          // currentTime is in seconds
+          const current = eventData.currentTime || Math.round(eventData.timestamp / 1000) || 0
+          // duration is total duration in seconds
+          const total = eventData.duration || 0
+          
+          setCurrentTime(current)
+          setTotalDuration(total)
+          
+          // Save progress to database only on significant events (play, pause, ended, seeked) or every 10 seconds
+          const shouldSave = ['play', 'pause', 'ended', 'seeked'].includes(eventData.event) || 
+                            (eventData.event === 'timeupdate' && current % 10 < 1) // Save every ~10 seconds
+          
+          const token = localStorage.getItem('token')
+          if (token && tmdbId && title && shouldSave) {
+            try {
+              await dispatch(updateWatchProgress({
+                tmdbId: parseInt(tmdbId),
+                mediaType: eventData.mediaType || mediaType,
+                title,
+                posterPath,
+                backdropPath,
+                progressPercent,
+                currentTime: Math.round(current),
+                totalDuration: Math.round(total),
+                seasonNumber: (eventData.season || (mediaType === 'tv' ? season : null)) ? parseInt(eventData.season || season) : null,
+                episodeNumber: (eventData.episode || (mediaType === 'tv' ? episode : null)) ? parseInt(eventData.episode || episode) : null
+              })).unwrap()
+            } catch (error) {
+              console.error('Failed to save watch progress:', error)
+            }
+          }
         }
       } catch {
         // yoksay
