@@ -57,12 +57,12 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: production-files
-          path: .   # <---- ÖNEMLİ DÜZELTME
+          path: dist # Artifact'i *tekrar* dist klasörüne indirir.
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+          publish_dir: ./dist # Dist klasörünü yayınlar.
           cname: false
