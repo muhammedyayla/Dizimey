@@ -2,18 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dizimey - Page Not Found</title>
-    <link rel="icon" type="image/png" href="/Dizimey/icon.png" />
+    <title>Redirecting...</title>
   </head>
   <body>
-    <div id="root"></div>
     <script>
-      // Redirect to main index.html with base path
-      var path = window.location.pathname;
-      var basePath = '/Dizimey/';
-      var newPath = basePath + 'index.html' + window.location.search + window.location.hash;
-      window.location.replace(newPath);
+      var redirect = '/Dizimey/index.html' + window.location.search + window.location.hash;
+      window.location.replace(redirect);
     </script>
   </body>
 </html>
