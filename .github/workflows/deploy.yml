@@ -59,6 +59,13 @@ jobs:
           name: production-files
           path: dist
 
+      - name: Verify build files
+        run: |
+          echo "Checking dist folder contents:"
+          ls -la dist/
+          echo "Checking index.html:"
+          head -15 dist/index.html
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: peaceiris/actions-gh-pages@v3
@@ -67,3 +74,4 @@ jobs:
           publish_dir: ./dist
           cname: false
           keep_files: false
+          force_orphan: true
