@@ -63,7 +63,7 @@ const Home = () => {
 
       <SwiperSection title="Türkiye'de bu haftanın Top 10 Filmleri" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
-          <Link key={movie.id} to={`/${movie.id}`} className='top-rank-card'>
+          <Link key={movie.id} to={`/movie/${movie.id}`} className='top-rank-card'>
             <span className='top-rank-card__number'>{index + 1}</span>
             <div
               className='top-rank-card__poster'
@@ -75,7 +75,7 @@ const Home = () => {
 
       <SwiperSection title="Bu Haftanın Trend Olanları" slidesPerView="auto" spaceBetween={16}>
         {trendingNow.map((movie) => (
-          <Link key={movie.id} to={`/${movie.id}`} className='trend-card'>
+          <Link key={movie.id} to={`/movie/${movie.id}`} className='trend-card'>
             <div
               className='trend-card__media'
               style={{

@@ -12,7 +12,7 @@ const MovieCard = ({ movie }) => {
   const imageSrc = poster_path ? `${API_IMG}/${poster_path}` : ''
   const mediaTypeLabel = media_type === 'tv' ? 'TV Show' : 'Movie'
   
-  const detailPath = media_type === 'tv' ? `/tv/${id}` : `/${id}`
+  const detailPath = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
 
   return (
     <Link to={detailPath} className='movie-card'>

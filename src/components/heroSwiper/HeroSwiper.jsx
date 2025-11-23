@@ -134,7 +134,7 @@ const HeroSwiper = ({ movies, genres }) => {
                 )}
                 <div className='hero-swiper__actions'>
                   {movie && (
-                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/${movie.id}`} className='button button--primary'>
+                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`} className='button button--primary'>
                       <MdPlayArrow aria-hidden='true' />
                       Oynat
                     </Link>

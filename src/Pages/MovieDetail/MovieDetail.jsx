@@ -228,7 +228,7 @@ const MovieDetail = () => {
         <div className='recommendations-grid'>
           {similar.length ? (
             similar.map((item) => {
-              const itemPath = item.media_type === 'tv' ? `/tv/${item.id}` : `/${item.id}`
+              const itemPath = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`
               const itemTitle = item.title || item.name || item.original_title || item.original_name
               return (
                 <Link key={item.id} to={itemPath} className='recommend-card'>
