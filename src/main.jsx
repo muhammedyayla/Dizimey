@@ -8,7 +8,7 @@ import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
     <Provider store={store}>
-        <BrowserRouter basename="/Dizimey">
+        <BrowserRouter>
             <App />
         </BrowserRouter>
     </Provider>
