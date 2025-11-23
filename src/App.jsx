@@ -9,7 +9,6 @@ import MyList from './Pages/MyList/MyList'
 import MovieDetail from './Pages/MovieDetail/MovieDetail'
 import SeriesDetail from './Pages/SeriesDetail/SeriesDetail'
 import Search from './Pages/Search/Search'
-import AuthCallback from './Pages/AuthCallback/AuthCallback'
 
 import { Route, Routes } from 'react-router-dom'
 import { HOME, MY_LIST, MOVIE_DETAIL, TV_DETAIL, SEARCH } from './constants/path'
@@ -24,7 +23,6 @@ function App() {
             <Route path={`${MOVIE_DETAIL}`} element={<MovieDetail />}/>
             <Route path={TV_DETAIL} element={<SeriesDetail />}/>
             <Route path={SEARCH} element={<Search />}/>
-            <Route path="/auth/callback" element={<AuthCallback />}/>
           </Routes>
           <Footer />
       </div>

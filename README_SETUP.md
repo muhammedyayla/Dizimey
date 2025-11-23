@@ -2,55 +2,69 @@
 
 ## Environment Variables
 
-### Frontend (.env in root)
-```env
-VITE_API_KEY=8b0df767335a475bf7c6262444c31d24
-VITE_API_BASE_URL=http://localhost:3001/api
-```
+1. Create a `.env` file in the root directory with the following content:
 
-### Backend (.env in server folder)
 ```env
-# Database
-DB_SERVER=localhost
-DB_PORT=1433
+# TMDB API Key
+VITE_API_KEY=8b0df767335a475bf7c6262444c31d24
+
+# Backend API URL
+VITE_API_BASE_URL=http://localhost:3001/api
+
+# Database Configuration
+DB_SERVER=MY-PC
 DB_USER=sa
 DB_PASSWORD=Ab123456**
 DB_NAME=DizimeyDB
 
-# JWT & Session
-JWT_SECRET=dizimey-secret-key-2024
-SESSION_SECRET=dizimey-session-secret-2024
-
-# Google OAuth
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_CALLBACK_URL=http://localhost:3001/api/auth/google/callback
-
-# Frontend URL
-FRONTEND_URL=http://localhost:5173
-
-# Server Port
-PORT=3001
+# JWT Secret
+JWT_SECRET=your-secret-key-change-in-production
 ```
 
 ## Database Setup
 
-1. Run SQL script: `database/add_session_id_column.sql`
-   - This adds `session_id`, `google_id`, `display_name`, and `photo` columns to Users table
+1. Open SQL Server Management Studio (SSMS)
+2. Connect to your SQL Server instance (MY-PC)
+3. Run the SQL script located at `database/create_users_table.sql`
+4. This will create the `DizimeyDB` database and `Users` table
 
-## Google OAuth Setup
+## Backend Server Setup
 
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project
-3. Enable Google+ API
-4. Create OAuth 2.0 credentials
-5. Add authorized redirect URI: `http://localhost:3001/api/auth/google/callback`
-6. Copy Client ID and Client Secret to backend `.env`
+1. Navigate to the `server` directory:
+```bash
+cd server
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the server:
+```bash
+npm start
+```
+
+The server will run on `http://localhost:3001`
+
+## Frontend Setup
+
+1. Install dependencies (if not already installed):
+```bash
+npm install
+```
+
+2. Start the development server:
+```bash
+npm run dev
+```
+
+The frontend will run on `http://localhost:5173`
 
 ## Features
 
-- ✅ Signup only via Google OAuth
-- ✅ After Google OAuth, user sets username and password
-- ✅ Login with username + password
-- ✅ Unique session_id for each user
-- ✅ GitHub Pages deployment ready
+- User authentication (Login/Signup)
+- OAuth support (Google - coming soon)
+- MSSQL database integration
+- JWT token-based authentication
+

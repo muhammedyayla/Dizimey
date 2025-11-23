@@ -4,14 +4,12 @@ import Genres from '../../components/genres/genres'
 import MovieCard from '../../components/movieCard/movieCard'
 import SwiperSection from '../../components/swiperSection/SwiperSection'
 import HeroSwiper from '../../components/heroSwiper/HeroSwiper'
-import ContinueWatching from '../../components/continueWatching/ContinueWatching'
 import Tabs from '../../components/tabs/Tabs'
-import AuthModal from '../../components/authModal/AuthModal'
 import { useDispatch, useSelector } from 'react-redux'
 import { getMovieList, getMovieListByGenre, getTopRatedMovies, getTopRatedTv, getTrending } from '../../redux/slices/movieListSlice'
 import { API_IMG } from '../../constants/api'
 import Loading from '../../components/Loading/Loading'
-import { Link, useSearchParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 const getEnglishTitle = (item) =>
   item?.title || item?.name || item?.original_title || item?.original_name || ''
@@ -23,26 +21,6 @@ const Home = () => {
   const [selectedGenre, setSelectedGenre] = useState(null)
   const [isFetching, setIsFetching] = useState(false)
   const [topRatedTab, setTopRatedTab] = useState('movies')
-  const [searchParams, setSearchParams] = useSearchParams()
-  const [showAuthModal, setShowAuthModal] = useState(false)
-  const [sessionId, setSessionId] = useState(null)
-
-  // Check if coming from OAuth callback
-  useEffect(() => {
-    const oauthSessionId = searchParams.get('sessionId') || sessionStorage.getItem('oauth_sessionId')
-    const token = searchParams.get('token')
-    
-    if (oauthSessionId && !localStorage.getItem('user')) {
-      setSessionId(oauthSessionId)
-      setShowAuthModal(true)
-      if (token) {
-        sessionStorage.setItem('oauth_token', token)
-      }
-      sessionStorage.setItem('oauth_sessionId', oauthSessionId)
-      // Clear URL params
-      setSearchParams({})
-    }
-  }, [searchParams, setSearchParams])
 
   useEffect(() => {
     let isMounted = true
@@ -82,8 +60,6 @@ const Home = () => {
   return (
     <div className='home'>
       <HeroSwiper movies={featuredMovies} genres={genres} />
-
-      <ContinueWatching />
 
       <SwiperSection title="Türkiye'de bu haftanın Top 10 Filmleri" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
@@ -150,21 +126,6 @@ const Home = () => {
           )}
         </SwiperSection>
       )}
-      <AuthModal
-        open={showAuthModal}
-        onClose={() => {
-          setShowAuthModal(false)
-          sessionStorage.removeItem('oauth_token')
-          sessionStorage.removeItem('oauth_sessionId')
-        }}
-        sessionId={sessionId}
-        onCompleteSignup={() => {
-          setShowAuthModal(false)
-          sessionStorage.removeItem('oauth_token')
-          sessionStorage.removeItem('oauth_sessionId')
-          window.location.reload()
-        }}
-      />
     </div>
   )
 }

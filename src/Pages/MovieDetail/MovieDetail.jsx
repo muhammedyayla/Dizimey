@@ -4,7 +4,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import { getMovieById } from '../../redux/slices/movieDetailSlice'
 import { API_IMG, API_MOVIE_VIDEOS_URL, API_MOVIE_IMAGES_URL, API_KEY } from '../../constants/api'
-import { addToWatchlist, removeFromWatchlist, fetchWatchlist } from '../../redux/slices/watchlistSlice'
+import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { MdPlayArrow, MdAdd, MdCheck } from 'react-icons/md'
 import PlayerModal from '../../components/player/PlayerModal'
 import axios from 'axios'
@@ -13,7 +13,7 @@ const MovieDetail = () => {
   const { id } = useParams()
   const dispatch = useDispatch()
   const { movieDetail } = useSelector((store) => store.movieDetail)
-  const { items: watchlist } = useSelector((store) => store.watchlist)
+  const { movies } = useSelector((store) => store.favorite)
   const [isFavorite, setIsFavorite] = useState(false)
   const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const [trailerKey, setTrailerKey] = useState(null)
@@ -56,13 +56,9 @@ const MovieDetail = () => {
   }, [id])
 
   useEffect(() => {
-    dispatch(fetchWatchlist())
-  }, [dispatch])
-
-  useEffect(() => {
-    const exists = watchlist?.some((item) => String(item.tmdb_id) === String(id) && item.media_type === 'movie')
+    const exists = movies?.some((movie) => String(movie.id) === String(id))
     setIsFavorite(Boolean(exists))
-  }, [watchlist, id])
+  }, [movies, id])
 
   const releaseYear = movieDetail?.release_date
     ? new Date(movieDetail.release_date).getFullYear()
@@ -86,29 +82,20 @@ const MovieDetail = () => {
     movieDetail?.original_title ||
     'Yükleniyor...'
 
-  const handleFavorite = async () => {
+  const handleFavorite = () => {
     if (!movieDetail) return
-    const token = localStorage.getItem('token')
-    
-    if (!token) {
-      alert('Lütfen önce giriş yapın')
-      return
-    }
 
     if (isFavorite) {
-      await dispatch(removeFromWatchlist({ tmdbId: movieDetail.id, mediaType: 'movie' }))
-      setIsFavorite(false)
+      dispatch(removeFromFavorite({ id }))
     } else {
-      await dispatch(
-        addToWatchlist({
+      dispatch(
+        addToFavorite({
           id: movieDetail.id,
-          media_type: 'movie',
           title: movieDetail.title,
           vote_average: movieDetail.vote_average,
           poster_path: movieDetail.poster_path,
         })
       )
-      setIsFavorite(true)
     }
   }
 
@@ -266,8 +253,6 @@ const MovieDetail = () => {
         mediaType={mediaType}
         tmdbId={movieDetail?.id}
         title={displayTitle}
-        posterPath={movieDetail?.poster_path}
-        backdropPath={movieDetail?.backdrop_path}
       />
     </div>
   )

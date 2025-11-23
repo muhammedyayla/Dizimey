@@ -4,8 +4,6 @@ import movieListSliceReducer from './slices/movieListSlice'
 import movieDetailSliceReducers from './slices/movieDetailSlice'
 import tvDetailSliceReducer from './slices/tvDetailSlice'
 import favoritesSliceReducers from "./slices/favoritesSlice";
-import watchlistSliceReducer from './slices/watchlistSlice'
-import watchProgressSliceReducer from './slices/watchProgressSlice'
 
 export const store = configureStore({
     reducer: {
@@ -13,8 +11,6 @@ export const store = configureStore({
         movieList: movieListSliceReducer,
         movieDetail: movieDetailSliceReducers,
         tvDetail: tvDetailSliceReducer,
-        favorite: favoritesSliceReducers,
-        watchlist: watchlistSliceReducer,
-        watchProgress: watchProgressSliceReducer
+        favorite: favoritesSliceReducers
     }
 })
