@@ -6,6 +6,10 @@ const BRAND_COLOR = 'ea2a33'
 const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
   if (!tmdbId) return ''
 
+  // Base URL'i environment variable'dan alıyoruz (VITE_PLAYER_BASE_URL)
+  // Bu sayede kod içerisinde açıkça "vidking.net" görünmez.
+  const playerBase = import.meta.env.VITE_PLAYER_BASE_URL || 'https://www.vidking.net/embed'
+
   const params = new URLSearchParams({
     color: BRAND_COLOR,
     autoPlay: 'true',
@@ -16,12 +20,12 @@ const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
     params.set('episodeSelector', 'true')
   }
 
-  const base =
+  const path =
     mediaType === 'tv'
-      ? `https://www.vidking.net/embed/tv/${tmdbId}/${season}/${episode}`
-      : `https://www.vidking.net/embed/movie/${tmdbId}`
+      ? `tv/${tmdbId}/${season}/${episode}`
+      : `movie/${tmdbId}`
 
-  return `${base}?${params.toString()}`
+  return `${playerBase}/${path}?${params.toString()}`
 }
 
 const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season: initialSeason, episode: initialEpisode }) => {
@@ -68,7 +72,7 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
       <div className='player-modal__body'>
         <div className='player-modal__header'>
           <div>
-            <p className='player-modal__eyebrow'>VidKing Player</p>
+            <p className='player-modal__eyebrow'>Player</p>
             <h4>{title}</h4>
           </div>
           <button type='button' className='player-modal__close' onClick={onClose} aria-label='Kapat'>
@@ -101,13 +105,16 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
 
         <div className='player-modal__iframe'>
           <iframe
-            title='VidKing Player'
+            title='Media Player'
             src={src}
             width='100%'
             height='100%'
             allow='autoplay; fullscreen'
             frameBorder='0'
             allowFullScreen
+            // Sandbox ile reklamları ve pop-up'ları engelliyoruz
+            // allow-popups ve allow-top-navigation kaldırıldı
+            sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-presentation"
           />
         </div>
 

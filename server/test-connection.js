@@ -12,8 +12,8 @@ const testConfigs = [
       authentication: {
         type: 'default',
         options: {
-          userName: process.env.DB_USER || 'sa',
-          password: process.env.DB_PASSWORD || 'Ab123456**'
+          userName: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
         }
       },
       options: {
@@ -31,8 +31,8 @@ const testConfigs = [
       authentication: {
         type: 'default',
         options: {
-          userName: process.env.DB_USER || 'sa',
-          password: process.env.DB_PASSWORD || 'Ab123456**'
+          userName: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
         }
       },
       options: {
@@ -50,8 +50,8 @@ const testConfigs = [
       authentication: {
         type: 'default',
         options: {
-          userName: process.env.DB_USER || 'sa',
-          password: process.env.DB_PASSWORD || 'Ab123456**'
+          userName: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
         }
       },
       options: {
@@ -69,8 +69,8 @@ const testConfigs = [
       authentication: {
         type: 'default',
         options: {
-          userName: process.env.DB_USER || 'sa',
-          password: process.env.DB_PASSWORD || 'Ab123456**'
+          userName: process.env.DB_USER,
+          password: process.env.DB_PASSWORD
         }
       },
       options: {
@@ -100,8 +100,8 @@ async function testConnection(config) {
 
 async function runTests() {
   console.log('🚀 Testing SQL Server connections...\n')
-  console.log(`Using credentials: ${process.env.DB_USER || 'sa'} / ${'*'.repeat((process.env.DB_PASSWORD || 'Ab123456**').length)}`)
-  
+  console.log(`Using credentials: ${process.env.DB_USER} / ${'*'.repeat((process.env.DB_PASSWORD).length)}`)
+
   for (const testConfig of testConfigs) {
     const success = await testConnection(testConfig)
     if (success) {
@@ -109,7 +109,7 @@ async function runTests() {
       break
     }
   }
-  
+
   console.log('\n📝 If all connections failed, check:')
   console.log('   1. SQL Server is running (services.msc)')
   console.log('   2. TCP/IP is enabled in SQL Server Configuration Manager')
