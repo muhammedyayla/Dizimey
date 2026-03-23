@@ -16,18 +16,19 @@ import { HOME, MY_LIST, MOVIE_DETAIL, TV_DETAIL, SEARCH } from './constants/path
 
 function App() {
   return (
-      <div className='app'>
-          <Navbar />
-          <Routes>
-            <Route path={HOME} element={<Home />}/>
-            <Route path={MY_LIST} element={<MyList />}/>
-            <Route path={MOVIE_DETAIL} element={<MovieDetail />}/>
-            <Route path={TV_DETAIL} element={<SeriesDetail />}/>
-            <Route path={SEARCH} element={<Search />}/>
-            <Route path="/auth/callback" element={<AuthCallback />}/>
-          </Routes>
-          <Footer />
-      </div>
+    <div className='app'>
+      <Navbar />
+      <Routes>
+        <Route path={HOME} element={<Home />} />
+        <Route path={MY_LIST} element={<MyList />} />
+        <Route path={MOVIE_DETAIL} element={<MovieDetail />} />
+        <Route path={TV_DETAIL} element={<SeriesDetail />} />
+        <Route path={SEARCH} element={<Search />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+      </Routes>
+      <Footer />
+    </div>
+
   )
 }
 
