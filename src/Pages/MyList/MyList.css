@@ -46,3 +46,44 @@
 .pagination li:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
+
+.my-list__item-wrapper {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.my-list__item-wrapper:hover {
+  transform: scale(1.03);
+  z-index: 10;
+}
+
+.my-list__remove-btn {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #ea2a33;
+  color: white;
+  border: 2px solid #141414;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 20;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+  opacity: 0;
+}
+
+.my-list__item-wrapper:hover .my-list__remove-btn {
+  opacity: 1;
+}
+
+.my-list__remove-btn:hover {
+  transform: scale(1.15) rotate(90deg);
+  background-color: #ff3b45;
+}

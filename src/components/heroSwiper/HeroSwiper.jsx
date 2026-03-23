@@ -112,34 +112,45 @@ const HeroSwiper = ({ movies, genres }) => {
                 style={{ backgroundImage: renderBackdrop(movie) ? `url(${renderBackdrop(movie)})` : undefined }}
               />
               <div className='hero-swiper__overlay' />
-              <div className='hero-swiper__content'>
-                {logos[movie.id] ? (
-                  <img src={`${API_IMG}/${logos[movie.id]}`} alt={getEnglishTitle(movie)} className='hero-swiper__logo' />
-                ) : (
-                  <h1>{getEnglishTitle(movie) || 'Dizimey Originals'}</h1>
-                )}
-                <p className='hero-swiper__description'>
-                  {movie?.overview ||
-                    'En popüler film ve dizileri izlemek için hazır olun. Keşfetmeye başlamak için aşağı kaydırın.'}
-                </p>
-                {heroMetaItems.length > 0 && (
-                  <div className='hero-swiper__meta'>
-                    {heroMetaItems.map((item, index) => (
-                      <React.Fragment key={item}>
-                        <span>{item}</span>
-                        {index < heroMetaItems.length - 1 && <span className='dot' />}
-                      </React.Fragment>
-                    ))}
+              <div className='hero-swiper__inner'>
+                <div className='hero-swiper__content'>
+                  {logos[movie.id] ? (
+                    <img src={`${API_IMG}/${logos[movie.id]}`} alt={getEnglishTitle(movie)} className='hero-swiper__logo' />
+                  ) : (
+                    <h1>{getEnglishTitle(movie) || 'Dizimey Originals'}</h1>
+                  )}
+                  <p className='hero-swiper__description'>
+                    {movie?.overview ||
+                      'En popüler film ve dizileri izlemek için hazır olun. Keşfetmeye başlamak için aşağı kaydırın.'}
+                  </p>
+                  {heroMetaItems.length > 0 && (
+                    <div className='hero-swiper__meta'>
+                      {heroMetaItems.map((item, index) => (
+                        <React.Fragment key={item}>
+                          <span>{item}</span>
+                          {index < heroMetaItems.length - 1 && <span className='dot' />}
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
+                  <div className='hero-swiper__actions'>
+                    {movie && (
+                      <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`} className='button button--primary'>
+                        <MdPlayArrow aria-hidden='true' />
+                        Oynat
+                      </Link>
+                    )}
+                  </div>
+                </div>
+                {movie?.poster_path && (
+                  <div className='hero-swiper__poster-wrap'>
+                    <img
+                      src={`${API_IMG}/${movie.poster_path}`}
+                      alt={getEnglishTitle(movie)}
+                      className='hero-swiper__poster'
+                    />
                   </div>
                 )}
-                <div className='hero-swiper__actions'>
-                  {movie && (
-                    <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`} className='button button--primary'>
-                      <MdPlayArrow aria-hidden='true' />
-                      Oynat
-                    </Link>
-                  )}
-                </div>
               </div>
             </SwiperSlide>
           )

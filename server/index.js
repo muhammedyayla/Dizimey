@@ -176,151 +176,153 @@ if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
       done(error, null)
     }
   })
+}
 
-  // Middleware to verify JWT token
-  const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token
+// Middleware to verify JWT token
+const verifyToken = (req, res, next) => {
+  const token = req.headers.authorization?.replace('Bearer ', '') || req.query.token
 
-    if (!token) {
-      return res.status(401).json({ success: false, message: 'Token bulunamadı' })
-    }
-
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET)
-      req.user = decoded
-      next()
-    } catch (error) {
-      return res.status(401).json({ success: false, message: 'Geçersiz token' })
-    }
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'Token bulunamadı' })
   }
 
-  // Health check endpoint
-  app.get('/api/health', async (req, res) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ status: 'error', message: 'Database not connected' })
-      }
-      await pool.query('SELECT 1')
-      res.json({ status: 'ok', message: 'Server and database are running' })
-    } catch (error) {
-      res.status(503).json({ status: 'error', message: error.message })
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET)
+    req.user = decoded
+    next()
+  } catch (error) {
+    return res.status(401).json({ success: false, message: 'Geçersiz token' })
+  }
+}
+
+// Health check endpoint
+app.get('/api/health', async (req, res) => {
+  try {
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ status: 'error', message: 'Database not connected' })
     }
-  })
+    await pool.query('SELECT 1')
+    res.json({ status: 'ok', message: 'Server and database are running' })
+  } catch (error) {
+    res.status(503).json({ status: 'error', message: error.message })
+  }
+})
 
-  // Auth Routes
-  app.post('/api/auth/signup', async (req, res) => {
-    try {
-      const { username, email, password } = req.body
+// Auth Routes
+app.post('/api/auth/signup', async (req, res) => {
+  try {
+    const { username, email, password } = req.body
 
-      if (!username || !email || !password) {
-        return res.status(400).json({ success: false, message: 'Tüm alanlar zorunludur' })
-      }
+    if (!username || !email || !password) {
+      return res.status(400).json({ success: false, message: 'Tüm alanlar zorunludur' })
+    }
 
-      if (password.length < 6) {
-        return res.status(400).json({ success: false, message: 'Şifre en az 6 karakter olmalıdır' })
-      }
+    if (password.length < 6) {
+      return res.status(400).json({ success: false, message: 'Şifre en az 6 karakter olmalıdır' })
+    }
 
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
-      }
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
+    }
 
-      const checkUser = await pool.query(
-        'SELECT * FROM users WHERE username = $1 OR email = $2',
-        [username, email]
-      )
+    const checkUser = await pool.query(
+      'SELECT * FROM users WHERE username = $1 OR email = $2',
+      [username, email]
+    )
 
-      if (checkUser.rows.length > 0) {
-        return res.status(400).json({ success: false, message: 'Kullanıcı adı veya e-posta zaten kullanılıyor' })
-      }
+    if (checkUser.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'Kullanıcı adı veya e-posta zaten kullanılıyor' })
+    }
 
-      const hashedPassword = await bcrypt.hash(password, 10)
-      const sessionId = uuidv4()
+    const hashedPassword = await bcrypt.hash(password, 10)
+    const sessionId = uuidv4()
 
-      const result = await pool.query(
-        `INSERT INTO users (username, email, password, session_id, created_at)
+    const result = await pool.query(
+      `INSERT INTO users (username, email, password, session_id, created_at)
        VALUES ($1, $2, $3, $4, NOW())
        RETURNING id, username, email, session_id, created_at`,
-        [username, email, hashedPassword, sessionId]
-      )
+      [username, email, hashedPassword, sessionId]
+    )
 
-      const user = result.rows[0]
-      const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
+    const user = result.rows[0]
+    const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
 
-      res.json({
-        success: true,
-        message: 'Kayıt başarılı',
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          sessionId: user.session_id
-        },
-        token
-      })
-    } catch (error) {
-      console.error('Signup error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    res.json({
+      success: true,
+      message: 'Kayıt başarılı',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        sessionId: user.session_id
+      },
+      token
+    })
+  } catch (error) {
+    console.error('Signup error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { username, password } = req.body
+
+    if (!username || !password) {
+      return res.status(400).json({ success: false, message: 'Kullanıcı adı ve şifre zorunludur' })
     }
-  })
 
-  app.post('/api/auth/login', async (req, res) => {
-    try {
-      const { username, password } = req.body
-
-      if (!username || !password) {
-        return res.status(400).json({ success: false, message: 'Kullanıcı adı ve şifre zorunludur' })
-      }
-
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
-      }
-
-      const result = await pool.query(
-        'SELECT * FROM users WHERE username = $1 AND password IS NOT NULL',
-        [username]
-      )
-
-      if (result.rows.length === 0) {
-        return res.status(401).json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' })
-      }
-
-      const user = result.rows[0]
-      const isValidPassword = await bcrypt.compare(password, user.password)
-
-      if (!isValidPassword) {
-        return res.status(401).json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' })
-      }
-
-      // Ensure session_id exists
-      if (!user.session_id) {
-        const sessionId = uuidv4()
-        await pool.query('UPDATE users SET session_id = $1 WHERE id = $2', [sessionId, user.id])
-        user.session_id = sessionId
-      }
-
-      const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
-
-      res.json({
-        success: true,
-        message: 'Giriş başarılı',
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          sessionId: user.session_id
-        },
-        token
-      })
-    } catch (error) {
-      console.error('Login error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
     }
-  })
 
-  // Google OAuth Routes
+    const result = await pool.query(
+      'SELECT * FROM users WHERE username = $1 AND password IS NOT NULL',
+      [username]
+    )
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' })
+    }
+
+    const user = result.rows[0]
+    const isValidPassword = await bcrypt.compare(password, user.password)
+
+    if (!isValidPassword) {
+      return res.status(401).json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' })
+    }
+
+    // Ensure session_id exists
+    if (!user.session_id) {
+      const sessionId = uuidv4()
+      await pool.query('UPDATE users SET session_id = $1 WHERE id = $2', [sessionId, user.id])
+      user.session_id = sessionId
+    }
+
+    const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
+
+    res.json({
+      success: true,
+      message: 'Giriş başarılı',
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        sessionId: user.session_id
+      },
+      token
+    })
+  } catch (error) {
+    console.error('Login error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+// Google OAuth Routes
+if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
   app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
 
   app.get('/api/auth/google/callback',
@@ -337,10 +339,11 @@ if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
         const frontendUrl = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173'
         res.redirect(`${frontendUrl}/?error=callback_failed`)
       }
-    }
-  )
+    })
+}
 
-  // Complete signup - set username and password after Google OAuth
+// Complete signup - set username and password after Google OAuth
+if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
   app.post('/api/auth/complete-signup', async (req, res) => {
     try {
       const { sessionId, username, password } = req.body
@@ -405,167 +408,168 @@ if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
       res.status(500).json({ success: false, message: 'Sunucu hatası' })
     }
   })
+}
 
-  // Logout route
-  app.post('/api/auth/logout', (req, res) => {
-    req.logout((err) => {
-      if (err) {
-        return res.status(500).json({ success: false, message: 'Logout hatası' })
-      }
-      res.json({ success: true, message: 'Çıkış başarılı' })
-    })
-  })
-
-  // Get current user info
-  app.get('/api/auth/me', verifyToken, async (req, res) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
-
-      const result = await pool.query(
-        'SELECT id, username, email, session_id, display_name, photo FROM users WHERE session_id = $1',
-        [req.user.sessionId]
-      )
-
-      if (result.rows.length === 0) {
-        return res.status(404).json({ success: false, message: 'Kullanıcı bulunamadı' })
-      }
-
-      res.json({ success: true, user: result.rows[0] })
-    } catch (error) {
-      console.error('Get user error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+// Logout route
+app.post('/api/auth/logout', (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      return res.status(500).json({ success: false, message: 'Logout hatası' })
     }
+    res.json({ success: true, message: 'Çıkış başarılı' })
   })
+})
 
-  // Watchlist Routes
-  app.get('/api/watchlist', verifyToken, async (req, res) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
-
-      const result = await pool.query(
-        'SELECT * FROM watchlist WHERE session_id = $1 ORDER BY added_at DESC',
-        [req.user.sessionId]
-      )
-
-      res.json({ success: true, watchlist: result.rows })
-    } catch (error) {
-      console.error('Get watchlist error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+// Get current user info
+app.get('/api/auth/me', verifyToken, async (req, res) => {
+  try {
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
     }
-  })
 
-  app.post('/api/watchlist', verifyToken, async (req, res) => {
-    try {
-      const { tmdb_id, media_type, title, poster_path, vote_average } = req.body
+    const result = await pool.query(
+      'SELECT id, username, email, session_id, display_name, photo FROM users WHERE session_id = $1',
+      [req.user.sessionId]
+    )
 
-      if (!tmdb_id || !media_type || !title) {
-        return res.status(400).json({ success: false, message: 'Eksik bilgi' })
-      }
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Kullanıcı bulunamadı' })
+    }
 
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
+    res.json({ success: true, user: result.rows[0] })
+  } catch (error) {
+    console.error('Get user error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
 
-      const check = await pool.query(
-        'SELECT * FROM watchlist WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3',
-        [req.user.sessionId, tmdb_id, media_type]
-      )
+// Watchlist Routes
+app.get('/api/watchlist', verifyToken, async (req, res) => {
+  try {
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
+    }
 
-      if (check.rows.length > 0) {
-        return res.status(400).json({ success: false, message: 'Zaten listede' })
-      }
+    const result = await pool.query(
+      'SELECT * FROM watchlist WHERE session_id = $1 ORDER BY added_at DESC',
+      [req.user.sessionId]
+    )
 
-      const result = await pool.query(
-        `INSERT INTO watchlist (session_id, tmdb_id, media_type, title, poster_path, vote_average, added_at)
+    res.json({ success: true, watchlist: result.rows })
+  } catch (error) {
+    console.error('Get watchlist error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+app.post('/api/watchlist', verifyToken, async (req, res) => {
+  try {
+    const { tmdb_id, media_type, title, poster_path, vote_average } = req.body
+
+    if (!tmdb_id || !media_type || !title) {
+      return res.status(400).json({ success: false, message: 'Eksik bilgi' })
+    }
+
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
+    }
+
+    const check = await pool.query(
+      'SELECT * FROM watchlist WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3',
+      [req.user.sessionId, tmdb_id, media_type]
+    )
+
+    if (check.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'Zaten listede' })
+    }
+
+    const result = await pool.query(
+      `INSERT INTO watchlist (session_id, tmdb_id, media_type, title, poster_path, vote_average, added_at)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())
        RETURNING *`,
-        [req.user.sessionId, tmdb_id, media_type, title, poster_path || null, vote_average || null]
-      )
+      [req.user.sessionId, tmdb_id, media_type, title, poster_path || null, vote_average || null]
+    )
 
-      res.json({ success: true, item: result.rows[0] })
-    } catch (error) {
-      console.error('Add watchlist error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    res.json({ success: true, item: result.rows[0] })
+  } catch (error) {
+    console.error('Add watchlist error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+app.delete('/api/watchlist/:tmdbId/:mediaType', verifyToken, async (req, res) => {
+  try {
+    const { tmdbId, mediaType } = req.params
+
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
     }
-  })
 
-  app.delete('/api/watchlist/:tmdbId/:mediaType', verifyToken, async (req, res) => {
-    try {
-      const { tmdbId, mediaType } = req.params
+    await pool.query(
+      'DELETE FROM watchlist WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3',
+      [req.user.sessionId, tmdbId, mediaType]
+    )
 
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
+    res.json({ success: true, message: 'Listeden çıkarıldı' })
+  } catch (error) {
+    console.error('Remove watchlist error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
 
-      await pool.query(
-        'DELETE FROM watchlist WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3',
-        [req.user.sessionId, tmdbId, mediaType]
-      )
-
-      res.json({ success: true, message: 'Listeden çıkarıldı' })
-    } catch (error) {
-      console.error('Remove watchlist error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+// Watch Progress Routes
+app.get('/api/watch-progress', verifyToken, async (req, res) => {
+  try {
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
     }
-  })
 
-  // Watch Progress Routes
-  app.get('/api/watch-progress', verifyToken, async (req, res) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
-
-      const result = await pool.query(
-        `SELECT * FROM watch_progress 
+    const result = await pool.query(
+      `SELECT * FROM watch_progress 
        WHERE session_id = $1 
        ORDER BY last_watched DESC`,
-        [req.user.sessionId]
-      )
+      [req.user.sessionId]
+    )
 
-      res.json({ success: true, progress: result.rows })
-    } catch (error) {
-      console.error('Get watch progress error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    res.json({ success: true, progress: result.rows })
+  } catch (error) {
+    console.error('Get watch progress error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+app.post('/api/watch-progress', verifyToken, async (req, res) => {
+  try {
+    const {
+      tmdb_id,
+      media_type,
+      title,
+      poster_path,
+      backdrop_path,
+      progress_percent,
+      current_time,
+      total_duration,
+      season_number,
+      episode_number
+    } = req.body
+
+    if (!tmdb_id || !media_type || !title) {
+      return res.status(400).json({ success: false, message: 'Eksik bilgi' })
     }
-  })
 
-  app.post('/api/watch-progress', verifyToken, async (req, res) => {
-    try {
-      const {
-        tmdb_id,
-        media_type,
-        title,
-        poster_path,
-        backdrop_path,
-        progress_percent,
-        current_time,
-        total_duration,
-        season_number,
-        episode_number
-      } = req.body
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
+    }
 
-      if (!tmdb_id || !media_type || !title) {
-        return res.status(400).json({ success: false, message: 'Eksik bilgi' })
-      }
-
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
-
-      // Upsert using PostgreSQL ON CONFLICT
-      const result = await pool.query(
-        `INSERT INTO watch_progress 
+    // Upsert using PostgreSQL ON CONFLICT
+    const result = await pool.query(
+      `INSERT INTO watch_progress 
        (session_id, tmdb_id, media_type, title, poster_path, backdrop_path, progress_percent, current_time, total_duration, season_number, episode_number, last_watched, updated_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
        ON CONFLICT (session_id, tmdb_id, media_type, season_number, episode_number)
@@ -576,66 +580,66 @@ if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
          last_watched = NOW(),
          updated_at = NOW()
        RETURNING *`,
-        [
-          req.user.sessionId, tmdb_id, media_type, title,
-          poster_path || null, backdrop_path || null,
-          progress_percent || 0, current_time || 0, total_duration || 0,
-          season_number || -1, episode_number || -1
-        ]
-      )
+      [
+        req.user.sessionId, tmdb_id, media_type, title,
+        poster_path || null, backdrop_path || null,
+        progress_percent || 0, current_time || 0, total_duration || 0,
+        season_number || -1, episode_number || -1
+      ]
+    )
 
-      res.json({ success: true, progress: result.rows[0] })
-    } catch (error) {
-      console.error('Update watch progress error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    res.json({ success: true, progress: result.rows[0] })
+  } catch (error) {
+    console.error('Update watch progress error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
+  }
+})
+
+app.delete('/api/watch-progress/:tmdbId/:mediaType', verifyToken, async (req, res) => {
+  try {
+    const { tmdbId, mediaType } = req.params
+    const seasonNumber = req.query.season ? parseInt(req.query.season) : null
+    const episodeNumber = req.query.episode ? parseInt(req.query.episode) : null
+
+    const pool = await connectDB()
+    if (!pool) {
+      return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
     }
-  })
 
-  app.delete('/api/watch-progress/:tmdbId/:mediaType', verifyToken, async (req, res) => {
-    try {
-      const { tmdbId, mediaType } = req.params
-      const seasonNumber = req.query.season ? parseInt(req.query.season) : null
-      const episodeNumber = req.query.episode ? parseInt(req.query.episode) : null
+    let query = 'DELETE FROM watch_progress WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3'
+    const params = [req.user.sessionId, tmdbId, mediaType]
 
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı' })
-      }
-
-      let query = 'DELETE FROM watch_progress WHERE session_id = $1 AND tmdb_id = $2 AND media_type = $3'
-      const params = [req.user.sessionId, tmdbId, mediaType]
-
-      if (seasonNumber !== null && seasonNumber !== -1) {
-        query += ' AND season_number = $4'
-        params.push(seasonNumber)
-        if (episodeNumber !== null && episodeNumber !== -1) {
-          query += ' AND episode_number = $5'
-          params.push(episodeNumber)
-        } else {
-          query += ' AND episode_number = -1'
-        }
-      } else if (episodeNumber !== null && episodeNumber !== -1) {
-        query += ' AND season_number = -1 AND episode_number = $4'
+    if (seasonNumber !== null && seasonNumber !== -1) {
+      query += ' AND season_number = $4'
+      params.push(seasonNumber)
+      if (episodeNumber !== null && episodeNumber !== -1) {
+        query += ' AND episode_number = $5'
         params.push(episodeNumber)
       } else {
-        query += ' AND season_number = -1 AND episode_number = -1'
+        query += ' AND episode_number = -1'
       }
-
-      await pool.query(query, params)
-
-      res.json({ success: true, message: 'İlerleme silindi' })
-    } catch (error) {
-      console.error('Delete watch progress error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
+    } else if (episodeNumber !== null && episodeNumber !== -1) {
+      query += ' AND season_number = -1 AND episode_number = $4'
+      params.push(episodeNumber)
+    } else {
+      query += ' AND season_number = -1 AND episode_number = -1'
     }
-  })
 
-  // Vercel serverless function compatibility
-  export default app
+    await pool.query(query, params)
 
-  // For local development
-  if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`)
-    })
+    res.json({ success: true, message: 'İlerleme silindi' })
+  } catch (error) {
+    console.error('Delete watch progress error:', error)
+    res.status(500).json({ success: false, message: 'Sunucu hatası' })
   }
+})
+
+// Vercel serverless function compatibility
+export default app
+
+// For local development
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+  })
+}

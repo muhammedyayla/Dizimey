@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './playerModal.css'
 
 const BRAND_COLOR = 'ea2a33'
@@ -32,6 +32,72 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
   const [season, setSeason] = useState(initialSeason || 1)
   const [episode, setEpisode] = useState(initialEpisode || 1)
   const [lastEvent, setLastEvent] = useState(null)
+  const playerWrapperRef = useRef(null)
+
+  // Tam ekran fonksiyonu
+  const handleFullscreen = () => {
+    const el = playerWrapperRef.current
+    if (!el) return
+    if (el.requestFullscreen) el.requestFullscreen()
+    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
+    else if (el.mozRequestFullScreen) el.mozRequestFullScreen()
+    else if (el.msRequestFullscreen) el.msRequestFullscreen()
+  }
+
+  // Modal açıldığında player'ı tam ekrana al
+  useEffect(() => {
+    if (!open) return
+    // Kısa gecikme: modal DOM'a yerleştikten sonra fullscreen isteği gönder
+    const timer = setTimeout(() => {
+      handleFullscreen()
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [open, tmdbId])
+
+  // Modal açıkken site genelinde (iframe hariç) sağ tık engelle
+  // (Çapraz domain (cross-origin) iframe içine tarayıcı güvenliği gereği müdahale edilemez 
+  // ancak wrapper ve çevresi korunur)
+  useEffect(() => {
+    if (!open) return
+    const blockContext = (e) => e.preventDefault()
+    window.addEventListener('contextmenu', blockContext)
+    
+    // Wrapper özelinde de dinleyiciyi ekle
+    const el = playerWrapperRef.current
+    if (el) el.addEventListener('contextmenu', blockContext)
+
+    return () => {
+      window.removeEventListener('contextmenu', blockContext)
+      if (el) el.removeEventListener('contextmenu', blockContext)
+    }
+  }, [open])
+
+  // ESC ile tam ekrandan çıkılınca modal da kapansın
+  // Ayrıca tam ekrandayken sağ tık engelle
+  useEffect(() => {
+    if (!open) return
+
+    const handleFullscreenChange = () => {
+      const isFullscreen = !!document.fullscreenElement
+
+      if (!isFullscreen) {
+        // Tam ekrandan çıkıldı (ESC veya buton) → modal'ı kapat
+        onClose()
+      } else {
+        // Tam ekrana girildi → sağ tık engelle
+        const blockContext = (e) => e.preventDefault()
+        document.addEventListener('contextmenu', blockContext)
+        const cleanup = () => {
+          document.removeEventListener('contextmenu', blockContext)
+          document.removeEventListener('fullscreenchange', cleanup)
+        }
+        document.addEventListener('fullscreenchange', cleanup)
+      }
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [open, onClose])
 
   useEffect(() => {
     if (!open) return undefined
@@ -103,7 +169,7 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
           </div>
         )}
 
-        <div className='player-modal__iframe'>
+        <div ref={playerWrapperRef} className='player-wrapper'>
           <iframe
             title='Media Player'
             src={src}
@@ -131,4 +197,5 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
 }
 
 export default PlayerModal
+
 

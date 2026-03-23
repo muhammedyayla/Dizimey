@@ -79,12 +79,30 @@
     color: #fff;
 }
 
-.player-modal__iframe {
+.player-wrapper {
     width: 100%;
     aspect-ratio: 16 / 9;
     border-radius: 16px;
     overflow: hidden;
     background-color: #000;
+    position: relative;
+}
+
+/* Tam ekran modunda boyutu tam yap */
+.player-wrapper:fullscreen,
+.player-wrapper:-webkit-full-screen,
+.player-wrapper:-moz-full-screen {
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    aspect-ratio: unset;
+}
+
+.player-wrapper:fullscreen iframe,
+.player-wrapper:-webkit-full-screen iframe,
+.player-wrapper:-moz-full-screen iframe {
+    width: 100%;
+    height: 100%;
 }
 
 .player-modal__event {

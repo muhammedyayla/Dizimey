@@ -4,6 +4,7 @@ import Genres from '../../components/genres/genres'
 import MovieCard from '../../components/movieCard/movieCard'
 import SwiperSection from '../../components/swiperSection/SwiperSection'
 import HeroSwiper from '../../components/heroSwiper/HeroSwiper'
+import WatchProviders from '../../components/watchProviders/WatchProviders'
 import Tabs from '../../components/tabs/Tabs'
 import { useDispatch, useSelector } from 'react-redux'
 import { getMovieList, getMovieListByGenre, getTopRatedMovies, getTopRatedTv, getTrending } from '../../redux/slices/movieListSlice'
@@ -110,6 +111,8 @@ const Home = () => {
           )}
         </SwiperSection>
       </section>
+
+      <WatchProviders />
 
       <Genres setSelectedGenre={setSelectedGenre} />
 

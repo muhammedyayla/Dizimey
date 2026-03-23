@@ -255,9 +255,6 @@ const SeriesDetail = () => {
                     {episode.overview || 'Açıklama mevcut değil.'}
                   </p>
                 </div>
-                <button className='episode-card__download' aria-label='İndir'>
-                  <MdDownload />
-                </button>
               </div>
             ))}
           </div>

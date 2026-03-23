@@ -1,13 +1,15 @@
 import React, {useState} from 'react'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 import MovieCard from '../../components/movieCard/movieCard'
 import './MyList.css'
 import ReactPaginate from 'react-paginate';
 import { GrPrevious, GrNext } from "react-icons/gr";
+import { removeFromFavorite } from '../../redux/slices/favoritesSlice'
 
 const MyList = () => {
 
   const { movies } = useSelector((store) => store.favorite)
+  const dispatch = useDispatch()
   console.log(movies);
 
 
@@ -31,7 +33,16 @@ const MyList = () => {
         <ul>
             {
               currentItems && currentItems.map((movie, index) => (
-                  <MovieCard key={movie.id + index} movie={movie} />
+                <div key={movie.id + index} className="my-list__item-wrapper">
+                  <MovieCard movie={movie} />
+                  <button 
+                    className="my-list__remove-btn" 
+                    onClick={() => dispatch(removeFromFavorite(movie))}
+                    aria-label="Listeden Çıkar"
+                  >
+                    ×
+                  </button>
+                </div>
               ))
             }
         </ul>

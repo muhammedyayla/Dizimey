@@ -1,0 +1,133 @@
+.watch-providers {
+    padding: 0 clamp(16px, 4vw, 64px);
+    margin-bottom: 40px;
+}
+
+/* Provider pill bar */
+.watch-providers__bar {
+    margin-bottom: 16px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.watch-providers__bar::-webkit-scrollbar {
+    display: none;
+}
+
+.watch-providers__pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.watch-providers__pill {
+    padding: 6px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.65);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.18s ease;
+    flex-shrink: 0;
+}
+
+.watch-providers__pill:hover {
+    background-color: rgba(234, 42, 51, 0.18);
+    border-color: rgba(234, 42, 51, 0.5);
+    color: #fff;
+}
+
+.watch-providers__pill.is-active {
+    background-color: var(--color-primary, #ea2a33);
+    border-color: var(--color-primary, #ea2a33);
+    color: #fff;
+    font-weight: 700;
+}
+
+/* Section header */
+.watch-providers__header {
+    margin-bottom: 18px;
+}
+
+/* Loading state */
+.watch-providers__loading {
+    padding: 24px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 0.9rem;
+}
+
+/* Content cards */
+.provider-content-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-decoration: none;
+    color: inherit;
+    flex-shrink: 0;
+    width: 140px;
+    transition: transform 0.22s ease;
+}
+
+.provider-content-card:hover {
+    transform: scale(1.04);
+}
+
+.provider-content-card__poster {
+    width: 140px;
+    aspect-ratio: 2 / 3;
+    border-radius: 14px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    overflow: hidden;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.provider-content-card__badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+}
+
+.provider-content-card__title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.88);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    margin: 0;
+}
+
+.provider-content-card__year {
+    font-size: 0.73rem;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+    .watch-providers__pills {
+        flex-wrap: nowrap;
+    }
+    .provider-content-card {
+        width: 120px;
+    }
+    .provider-content-card__poster {
+        width: 120px;
+    }
+}
