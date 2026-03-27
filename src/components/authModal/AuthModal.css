@@ -152,49 +152,6 @@
     cursor: not-allowed;
 }
 
-.auth-modal__divider {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin: 24px 0;
-    color: var(--color-muted);
-    font-size: 0.9rem;
-}
-
-.auth-modal__divider::before,
-.auth-modal__divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
-.auth-modal__oauth {
-    width: 100%;
-    padding: 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--color-text);
-    font-size: 1rem;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.auth-modal__oauth:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-.auth-modal__oauth svg {
-    font-size: 1.5rem;
-}
-
 .auth-modal__footer {
     margin-top: 24px;
     text-align: center;

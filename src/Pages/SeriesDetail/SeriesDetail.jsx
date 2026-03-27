@@ -2,11 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react'
 import './SeriesDetail.css'
 import { useParams, Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { getTvById, getTvSeasonEpisodes } from '../../redux/slices/tvDetailSlice'
+import { getTvById } from '../../redux/slices/tvDetailSlice'
 import { API_IMG, API_TV_FIND_URL, API_TV_VIDEOS_URL, API_TV_IMAGES_URL, API_KEY } from '../../constants/api'
 import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
-import { MdPlayArrow, MdAdd, MdCheck, MdSearch, MdDownload } from 'react-icons/md'
+import { MdPlayArrow, MdAdd, MdCheck, MdSearch } from 'react-icons/md'
 import PlayerModal from '../../components/player/PlayerModal'
+import { getContinueEntry } from '../../constants/playerProgress'
 import axios from 'axios'
 
 const SeriesDetail = () => {
@@ -23,6 +24,9 @@ const SeriesDetail = () => {
   const [loadingEpisodes, setLoadingEpisodes] = useState(false)
   const [trailerKey, setTrailerKey] = useState(null)
   const [logoPath, setLogoPath] = useState(null)
+  const [isEpisodePickerOpen, setIsEpisodePickerOpen] = useState(false)
+  const [showSeasonList, setShowSeasonList] = useState(false)
+  const [autoNext, setAutoNext] = useState(true)
 
   useEffect(() => {
     dispatch(getTvById(id))
@@ -136,6 +140,55 @@ const SeriesDetail = () => {
     )
   }, [episodes, episodeSearch])
 
+  const pickerEpisodes = useMemo(() => {
+    if (!episodeSearch.trim()) return episodes
+    return episodes.filter((ep) =>
+      ep.name?.toLowerCase().includes(episodeSearch.toLowerCase()) ||
+      String(ep.episode_number).includes(episodeSearch) ||
+      ep.overview?.toLowerCase().includes(episodeSearch.toLowerCase())
+    )
+  }, [episodes, episodeSearch])
+
+  const episodeProgress = useMemo(
+    () =>
+      episodes.reduce((acc, ep) => {
+        const entry = getContinueEntry({
+          type: 'episode',
+          id: Number(id),
+          season: ep.season_number,
+          episode: ep.episode_number,
+        })
+        if (entry) {
+          acc[`${ep.season_number}-${ep.episode_number}`] = entry
+        }
+        return acc
+      }, {}),
+    [episodes, id]
+  )
+
+  const selectedEpisodeIndex = useMemo(
+    () =>
+      pickerEpisodes.findIndex(
+        (ep) => ep.season_number === selectedEpisode.season && ep.episode_number === selectedEpisode.episode
+      ),
+    [pickerEpisodes, selectedEpisode]
+  )
+
+  const handlePlayerEvent = (eventData) => {
+    if (!autoNext || !eventData || episodes.length === 0) return
+    const eventName = String(eventData.event || '').toLowerCase()
+    const progress = Number(eventData.progress || 0)
+    const hasEnded = eventName.includes('ended') || progress >= 99.9
+    if (!hasEnded) return
+
+    const currentIndex = episodes.findIndex(
+      (ep) => ep.season_number === selectedEpisode.season && ep.episode_number === selectedEpisode.episode
+    )
+    if (currentIndex < 0 || currentIndex >= episodes.length - 1) return
+    const nextEpisode = episodes[currentIndex + 1]
+    setSelectedEpisode({ season: nextEpisode.season_number, episode: nextEpisode.episode_number })
+  }
+
   const cast = tvDetail?.credits?.cast?.slice(0, 6) || []
   const similar = tvDetail?.similar?.results?.slice(0, 6) || []
 
@@ -228,6 +281,13 @@ const SeriesDetail = () => {
                 className='episode-search__input'
               />
             </div>
+            <button
+              type='button'
+              className='button button--secondary episodes-controls__picker-btn'
+              onClick={() => setIsEpisodePickerOpen(true)}
+            >
+              Episodes
+            </button>
           </div>
           <div className='episodes-list'>
             {filteredEpisodes.map((episode) => (
@@ -324,7 +384,101 @@ const SeriesDetail = () => {
         title={displayTitle}
         season={selectedEpisode.season}
         episode={selectedEpisode.episode}
+        posterPath={tvDetail?.poster_path}
+        onPlayerEvent={handlePlayerEvent}
       />
+      {isEpisodePickerOpen && (
+        <div className='episode-picker'>
+          <button type='button' className='episode-picker__backdrop' onClick={() => setIsEpisodePickerOpen(false)} />
+          <aside className='episode-picker__panel'>
+            <div className='episode-picker__header'>
+              <div className='episode-search'>
+                <MdSearch className='episode-search__icon' />
+                <input
+                  type='text'
+                  placeholder='Bölüm adı ya da no ara...'
+                  value={episodeSearch}
+                  onChange={(e) => setEpisodeSearch(e.target.value)}
+                  className='episode-search__input'
+                />
+              </div>
+              <div className='episode-picker__actions'>
+                <button type='button' className='episode-picker__season-btn' onClick={() => setShowSeasonList((prev) => !prev)}>
+                  Sezon {selectedSeason}
+                </button>
+                <label className='episode-picker__toggle'>
+                  <input type='checkbox' checked={autoNext} onChange={(e) => setAutoNext(e.target.checked)} />
+                  <span>Auto Next</span>
+                </label>
+                <button type='button' className='episode-picker__close' onClick={() => setIsEpisodePickerOpen(false)}>
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {showSeasonList ? (
+              <div className='episode-picker__season-list'>
+                {seasons.map((season) => (
+                  <button
+                    type='button'
+                    key={season.id}
+                    className={`episode-picker__season-item ${selectedSeason === season.season_number ? 'is-active' : ''}`}
+                    onClick={() => {
+                      setSelectedSeason(season.season_number)
+                      setShowSeasonList(false)
+                    }}
+                  >
+                    Sezon {season.season_number}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className='episode-picker__list'>
+                {loadingEpisodes && <p className='empty-state'>Bölümler yükleniyor...</p>}
+                {!loadingEpisodes &&
+                  pickerEpisodes.map((episode, idx) => {
+                    const key = `${episode.season_number}-${episode.episode_number}`
+                    const progress = episodeProgress[key]
+                    const minutesTotal = Math.max(1, Math.round((progress?.duration || 0) / 60))
+                    const minutesLeft = Math.max(0, Math.round(((progress?.duration || 0) - (progress?.time || 0)) / 60))
+                    const showWatching = Boolean(progress && progress.time > 0 && progress.time < progress.duration)
+                    const isActive =
+                      selectedEpisode.season === episode.season_number &&
+                      selectedEpisode.episode === episode.episode_number
+                    const isNearActive = selectedEpisodeIndex >= 0 && Math.abs(selectedEpisodeIndex - idx) <= 1
+
+                    return (
+                      <button
+                        type='button'
+                        key={`s${episode.season_number}e${episode.episode_number}`}
+                        className={`episode-picker__item ${isActive ? 'is-active' : ''} ${isNearActive ? 'is-near' : ''}`}
+                        onClick={() => {
+                          handlePlayEpisode(episode.season_number, episode.episode_number)
+                          setIsEpisodePickerOpen(false)
+                        }}
+                      >
+                        <div className='episode-picker__thumb'>
+                          <img
+                            src={episode.still_path ? `${API_IMG}/${episode.still_path}` : `${API_IMG}/${tvDetail?.poster_path}`}
+                            alt={`${episode.name} thumbnail`}
+                          />
+                          {showWatching && <span className='episode-picker__watching'>WATCHING</span>}
+                        </div>
+                        <div className='episode-picker__meta'>
+                          <h3>{episode.episode_number}. Bölüm: {episode.name}</h3>
+                          <p>{minutesLeft > 0 ? `${minutesLeft} dk kaldı` : `${minutesTotal} dk`}</p>
+                          <p className='episode-picker__overview'>
+                            {episode.overview || 'Açıklama mevcut değil.'}
+                          </p>
+                        </div>
+                      </button>
+                    )
+                  })}
+              </div>
+            )}
+          </aside>
+        </div>
+      )}
     </div>
   )
 }

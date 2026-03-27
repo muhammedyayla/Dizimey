@@ -9,6 +9,7 @@ import Tabs from '../../components/tabs/Tabs'
 import { useDispatch, useSelector } from 'react-redux'
 import { getMovieList, getMovieListByGenre, getTopRatedMovies, getTopRatedTv, getTrending } from '../../redux/slices/movieListSlice'
 import { API_IMG } from '../../constants/api'
+import { getAllContinueEntries } from '../../constants/playerProgress'
 import Loading from '../../components/Loading/Loading'
 import { Link } from 'react-router-dom'
 
@@ -22,6 +23,7 @@ const Home = () => {
   const [selectedGenre, setSelectedGenre] = useState(null)
   const [isFetching, setIsFetching] = useState(false)
   const [topRatedTab, setTopRatedTab] = useState('movies')
+  const [continueEntries, setContinueEntries] = useState([])
 
   useEffect(() => {
     let isMounted = true
@@ -53,16 +55,61 @@ const Home = () => {
     dispatch(getTrending())
   }, [dispatch])
 
+  useEffect(() => {
+    setContinueEntries(getAllContinueEntries())
+  }, [])
+
   const featuredMovies = useMemo(() => trending.slice(0, 10), [trending])
   const topTen = useMemo(() => movieList.slice(0, 10), [movieList])
   const trendingNow = useMemo(() => movieList.slice(10, 16), [movieList])
   const topRatedList = useMemo(() => topRatedTab === 'movies' ? topRatedMovies : topRatedTv, [topRatedTab, topRatedMovies, topRatedTv])
 
+  const handleRemoveContinue = (event, entryKey) => {
+    event.preventDefault()
+    event.stopPropagation()
+    localStorage.removeItem(entryKey)
+    setContinueEntries((prev) => prev.filter((item) => item.key !== entryKey))
+  }
+
   return (
     <div className='home'>
       <HeroSwiper movies={featuredMovies} genres={genres} />
 
-      <SwiperSection title="Türkiye'de bu haftanın Top 10 Filmleri" slidesPerView="auto" spaceBetween={16}>
+      {continueEntries.length > 0 && (
+        <SwiperSection title="Continue Watching" slidesPerView="auto" spaceBetween={16}>
+          {continueEntries.map((entry) => {
+            const progress = Math.min(100, Math.max(0, ((entry.time || 0) / (entry.duration || 1)) * 100))
+            const path =
+              entry.type === 'movie'
+                ? `/movie/${entry.id}`
+                : `/tv/${entry.id}`
+
+            return (
+              <Link key={entry.key} to={path} className='continue-card'>
+                <div
+                  className='continue-card__media'
+                  style={{ backgroundImage: entry.poster_path ? `url(${API_IMG}/${entry.poster_path})` : undefined }}
+                >
+                  <button
+                    type='button'
+                    className='continue-card__remove'
+                    aria-label='Devam kaydını sil'
+                    onClick={(event) => handleRemoveContinue(event, entry.key)}
+                  >
+                    ×
+                  </button>
+                  <div className='continue-card__progress'>
+                    <div className='continue-card__progress-bar' style={{ width: `${progress}%` }} />
+                  </div>
+                </div>
+                <p>{entry.title || 'Untitled'}</p>
+              </Link>
+            )
+          })}
+        </SwiperSection>
+      )}
+
+      <SwiperSection titleBig="TOP 10" titleSmall="CONTENT TODAY"  slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
           <Link key={movie.id} to={`/movie/${movie.id}`} className='top-rank-card'>
             <span className='top-rank-card__number'>{index + 1}</span>

@@ -97,17 +97,34 @@
 }
 
 .continue-card__progress {
-    margin-top: 12px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
     width: 100%;
-    height: 4px;
-    border-radius: 999px;
-    background-color: rgba(255, 255, 255, 0.15);
+    height: 3px;
+    background-color: rgba(255, 255, 255, 0.25);
 }
 
 .continue-card__progress-bar {
     height: 100%;
-    border-radius: 999px;
     background-color: var(--color-primary);
+}
+
+.continue-card__remove {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
 }
 
 .continue-card p,

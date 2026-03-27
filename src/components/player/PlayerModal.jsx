@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './playerModal.css'
+import { getContinueEntry, buildContinueKey } from '../../constants/playerProgress'
 
 const BRAND_COLOR = 'ea2a33'
 
-const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
+const buildPlayerSrc = ({ mediaType, tmdbId, season, episode, startTime }) => {
   if (!tmdbId) return ''
 
   // Base URL'i environment variable'dan alıyoruz (VITE_PLAYER_BASE_URL)
@@ -19,6 +20,9 @@ const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
     params.set('nextEpisode', 'true')
     params.set('episodeSelector', 'true')
   }
+  if (Number(startTime) > 0) {
+    params.set('startTime', String(Math.floor(startTime)))
+  }
 
   const path =
     mediaType === 'tv'
@@ -28,11 +32,72 @@ const buildPlayerSrc = ({ mediaType, tmdbId, season, episode }) => {
   return `${playerBase}/${path}?${params.toString()}`
 }
 
-const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season: initialSeason, episode: initialEpisode }) => {
+const PlayerModal = ({
+  open,
+  onClose,
+  mediaType = 'movie',
+  tmdbId,
+  title,
+  season: initialSeason,
+  episode: initialEpisode,
+  startTime = 0,
+  posterPath = '',
+  onPlayerEvent,
+}) => {
   const [season, setSeason] = useState(initialSeason || 1)
   const [episode, setEpisode] = useState(initialEpisode || 1)
   const [lastEvent, setLastEvent] = useState(null)
   const playerWrapperRef = useRef(null)
+
+  const continueMeta = useMemo(() => {
+    if (!tmdbId) return null
+    const isMovie = mediaType !== 'tv'
+    return {
+      type: isMovie ? 'movie' : 'episode',
+      id: Number(tmdbId),
+      season,
+      episode,
+      title: title || '',
+      poster_path: posterPath || '',
+    }
+  }, [tmdbId, mediaType, season, episode, title, posterPath])
+
+  const resumeTime = useMemo(() => {
+    if (!continueMeta) return 0
+    const entry = getContinueEntry(continueMeta)
+    if (!entry) return 0
+    return Number(entry.time) || 0
+  }, [continueMeta])
+
+  const persistContinueProgress = () => {
+    if (!continueMeta || !lastEvent) return
+    const rawTime = Number(lastEvent.currentTime ?? lastEvent.time ?? lastEvent.current_time)
+    const rawDuration = Number(lastEvent.duration ?? lastEvent.totalDuration ?? lastEvent.total_duration)
+    if (!Number.isFinite(rawTime) || !Number.isFinite(rawDuration) || rawDuration <= 0) return
+
+    const payload = {
+      time: Math.max(0, rawTime),
+      duration: Math.max(1, rawDuration),
+      title: continueMeta.title,
+      poster_path: continueMeta.poster_path,
+      type: continueMeta.type,
+      id: continueMeta.id,
+      updatedAt: Date.now(),
+    }
+
+    if (continueMeta.type === 'episode') {
+      payload.season = continueMeta.season
+      payload.episode = continueMeta.episode
+    }
+
+    const key = buildContinueKey(continueMeta)
+    localStorage.setItem(key, JSON.stringify(payload))
+  }
+
+  const closePlayer = () => {
+    persistContinueProgress()
+    onClose()
+  }
 
   // Tam ekran fonksiyonu
   const handleFullscreen = () => {
@@ -82,7 +147,7 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
 
       if (!isFullscreen) {
         // Tam ekrandan çıkıldı (ESC veya buton) → modal'ı kapat
-        onClose()
+        closePlayer()
       } else {
         // Tam ekrana girildi → sağ tık engelle
         const blockContext = (e) => e.preventDefault()
@@ -97,7 +162,7 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
 
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [open, onClose])
+  }, [open, onClose, lastEvent, continueMeta])
 
   useEffect(() => {
     if (!open) return undefined
@@ -109,6 +174,9 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
         if (payload?.type === 'PLAYER_EVENT') {
           setLastEvent(payload.data)
           localStorage.setItem(`player-progress-${tmdbId}`, JSON.stringify(payload.data))
+          if (typeof onPlayerEvent === 'function') {
+            onPlayerEvent(payload.data)
+          }
         }
       } catch {
         // yoksay
@@ -117,7 +185,7 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [open, tmdbId])
+  }, [open, tmdbId, onPlayerEvent])
 
   useEffect(() => {
     if (!open) return
@@ -126,22 +194,22 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
   }, [open, tmdbId, mediaType, initialSeason, initialEpisode])
 
   const src = useMemo(
-    () => buildPlayerSrc({ mediaType, tmdbId, season, episode }),
-    [mediaType, tmdbId, season, episode]
+    () => buildPlayerSrc({ mediaType, tmdbId, season, episode, startTime: startTime || resumeTime }),
+    [mediaType, tmdbId, season, episode, startTime, resumeTime]
   )
 
   if (!open) return null
 
   return (
     <div className='player-modal'>
-      <div className='player-modal__backdrop' onClick={onClose} />
+      <div className='player-modal__backdrop' onClick={closePlayer} />
       <div className='player-modal__body'>
         <div className='player-modal__header'>
           <div>
             <p className='player-modal__eyebrow'>Player</p>
             <h4>{title}</h4>
           </div>
-          <button type='button' className='player-modal__close' onClick={onClose} aria-label='Kapat'>
+          <button type='button' className='player-modal__close' onClick={closePlayer} aria-label='Kapat'>
             ×
           </button>
         </div>
@@ -169,7 +237,11 @@ const PlayerModal = ({ open, onClose, mediaType = 'movie', tmdbId, title, season
           </div>
         )}
 
-        <div ref={playerWrapperRef} className='player-wrapper'>
+        <div
+          ref={playerWrapperRef}
+          className='player-wrapper'
+          onDoubleClick={closePlayer}
+        >
           <iframe
             title='Media Player'
             src={src}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './navbar.css'
 import { HOME, MY_LIST, SEARCH } from '../../constants/path'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { MdSearch } from 'react-icons/md'
 import AuthModal from '../authModal/AuthModal'
 import UserMenu from '../userMenu/UserMenu'
@@ -16,7 +16,6 @@ const navLinks = [
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 const Navbar = () => {
-  const dispatch = useDispatch()
   const { movies } = useSelector((store) => store.favorite)
   const [searchTerm, setSearchTerm] = useState('')
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
@@ -49,12 +48,6 @@ const Navbar = () => {
           localStorage.removeItem('user')
           setUser(null)
         }
-      }
-
-      // Check if user needs to complete signup
-      const oauthSessionId = sessionStorage.getItem('oauth_sessionId')
-      if (oauthSessionId && !user) {
-        setIsAuthModalOpen(true)
       }
 
       setCheckingAuth(false)
@@ -127,11 +120,7 @@ const Navbar = () => {
       </div>
       <AuthModal 
         open={isAuthModalOpen} 
-        onClose={() => {
-          setIsAuthModalOpen(false)
-          sessionStorage.removeItem('oauth_token')
-          sessionStorage.removeItem('oauth_sessionId')
-        }}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </header>
   )

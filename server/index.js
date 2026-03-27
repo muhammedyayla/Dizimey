@@ -5,9 +5,6 @@ import dotenv from 'dotenv'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { v4 as uuidv4 } from 'uuid'
-import passport from 'passport'
-import GoogleStrategy from 'passport-google-oauth20'
-import session from 'express-session'
 
 dotenv.config()
 
@@ -16,7 +13,6 @@ const PORT = process.env.PORT || 3001
 
 // JWT Secret
 const JWT_SECRET = process.env.JWT_SECRET || 'dizimey-jwt-secret-key-2024-change-in-production-' + Math.random().toString(36).substring(2, 15)
-const SESSION_SECRET = process.env.SESSION_SECRET || JWT_SECRET
 
 // CORS Configuration - Support both localhost and production
 const allowedOrigins = [
@@ -42,18 +38,6 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(express.json())
-
-// Session middleware
-app.use(session({
-  secret: SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: { secure: process.env.NODE_ENV === 'production', httpOnly: true, maxAge: 7 * 24 * 60 * 60 * 1000 } // 7 days
-}))
-
-// Passport middleware
-app.use(passport.initialize())
-app.use(passport.session())
 
 // PostgreSQL connection pool
 const { Pool } = pg
@@ -87,96 +71,9 @@ const connectDB = async () => {
   }
 }
 
-connectDB().catch((err) => {
+connectDB().catch(() => {
   console.error('Initial database connection failed, will retry on first request')
 })
-
-// Google OAuth Strategy
-// Determine callback URL based on environment
-const getCallbackURL = () => {
-  // Always use environment variable if set
-  if (process.env.GOOGLE_CALLBACK_URL) {
-    return process.env.GOOGLE_CALLBACK_URL
-  }
-
-  // Fallback to localhost for development (should set GOOGLE_CALLBACK_URL in .env)
-  console.warn('⚠️ GOOGLE_CALLBACK_URL not set in environment variables, using localhost fallback')
-  return 'http://localhost:3001/api/auth/google/callback'
-}
-
-// Google OAuth Strategy
-const googleStrategyOptions = {
-  clientID: process.env.GOOGLE_CLIENT_ID || '',
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-  callbackURL: getCallbackURL()
-}
-
-// Only initialize strategy if credentials are provided to prevent startup crash
-if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
-  passport.use(new GoogleStrategy(googleStrategyOptions, async (accessToken, refreshToken, profile, done) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return done(new Error('Database connection failed'), null)
-      }
-
-      const googleId = profile.id
-      const email = profile.emails?.[0]?.value
-      const displayName = profile.displayName
-      const photo = profile.photos?.[0]?.value
-
-      // Check if user exists (PostgreSQL)
-      const checkUser = await pool.query(
-        'SELECT * FROM users WHERE google_id = $1',
-        [googleId]
-      )
-
-      let user = checkUser.rows[0]
-
-      if (!user) {
-        // Create new user with Google OAuth
-        const sessionId = uuidv4()
-        const username = `user_${googleId.substring(0, 8)}`
-
-        const result = await pool.query(
-          `INSERT INTO users (google_id, email, username, display_name, photo, session_id, password, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, NULL, NOW())
-         RETURNING id, username, email, session_id, google_id`,
-          [googleId, email, username, displayName || null, photo || null, sessionId]
-        )
-
-        user = result.rows[0]
-      }
-
-      return done(null, user)
-    } catch (error) {
-      console.error('Google OAuth error:', error)
-      return done(error, null)
-    }
-  }))
-
-  passport.serializeUser((user, done) => {
-    done(null, user.id)
-  })
-
-  passport.deserializeUser(async (id, done) => {
-    try {
-      const pool = await connectDB()
-      if (!pool) {
-        return done(new Error('Database connection failed'), null)
-      }
-
-      const result = await pool.query(
-        'SELECT id, username, email, session_id, google_id, display_name, photo FROM users WHERE id = $1',
-        [id]
-      )
-
-      done(null, result.rows[0])
-    } catch (error) {
-      done(error, null)
-    }
-  })
-}
 
 // Middleware to verify JWT token
 const verifyToken = (req, res, next) => {
@@ -279,10 +176,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
     }
 
-    const result = await pool.query(
-      'SELECT * FROM users WHERE username = $1 AND password IS NOT NULL',
-      [username]
-    )
+    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username])
 
     if (result.rows.length === 0) {
       return res.status(401).json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' })
@@ -321,103 +215,9 @@ app.post('/api/auth/login', async (req, res) => {
   }
 })
 
-// Google OAuth Routes
-if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
-  app.get('/api/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }))
-
-  app.get('/api/auth/google/callback',
-    passport.authenticate('google', { failureRedirect: (process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173') + '/?error=auth_failed' }),
-    async (req, res) => {
-      try {
-        const user = req.user
-        const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
-
-        const frontendUrl = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173'
-        res.redirect(`${frontendUrl}/auth/callback?token=${token}&sessionId=${user.session_id}`)
-      } catch (error) {
-        console.error('OAuth callback error:', error)
-        const frontendUrl = process.env.FRONTEND_URL || process.env.CORS_ORIGIN || 'http://localhost:5173'
-        res.redirect(`${frontendUrl}/?error=callback_failed`)
-      }
-    })
-}
-
-// Complete signup - set username and password after Google OAuth
-if (googleStrategyOptions.clientID && googleStrategyOptions.clientSecret) {
-  app.post('/api/auth/complete-signup', async (req, res) => {
-    try {
-      const { sessionId, username, password } = req.body
-
-      if (!sessionId || !username || !password) {
-        return res.status(400).json({ success: false, message: 'Session ID, kullanıcı adı ve şifre zorunludur' })
-      }
-
-      if (password.length < 6) {
-        return res.status(400).json({ success: false, message: 'Şifre en az 6 karakter olmalıdır' })
-      }
-
-      const pool = await connectDB()
-      if (!pool) {
-        return res.status(503).json({ success: false, message: 'Veritabanı bağlantısı kurulamadı. Lütfen daha sonra tekrar deneyin.' })
-      }
-
-      const checkSession = await pool.query(
-        'SELECT * FROM users WHERE session_id = $1 AND password IS NULL',
-        [sessionId]
-      )
-
-      if (checkSession.rows.length === 0) {
-        return res.status(400).json({ success: false, message: 'Geçersiz session veya kullanıcı zaten kayıtlı' })
-      }
-
-      const checkUsername = await pool.query(
-        'SELECT * FROM users WHERE username = $1',
-        [username]
-      )
-
-      if (checkUsername.rows.length > 0) {
-        return res.status(400).json({ success: false, message: 'Kullanıcı adı zaten kullanılıyor' })
-      }
-
-      const hashedPassword = await bcrypt.hash(password, 10)
-
-      const result = await pool.query(
-        `UPDATE users
-       SET username = $1, password = $2, updated_at = NOW()
-       WHERE session_id = $3
-       RETURNING id, username, email, session_id`,
-        [username, hashedPassword, sessionId]
-      )
-
-      const user = result.rows[0]
-      const token = jwt.sign({ id: user.id, username: user.username, sessionId: user.session_id }, JWT_SECRET, { expiresIn: '7d' })
-
-      res.json({
-        success: true,
-        message: 'Kayıt tamamlandı',
-        user: {
-          id: user.id,
-          username: user.username,
-          email: user.email,
-          sessionId: user.session_id
-        },
-        token
-      })
-    } catch (error) {
-      console.error('Complete signup error:', error)
-      res.status(500).json({ success: false, message: 'Sunucu hatası' })
-    }
-  })
-}
-
 // Logout route
 app.post('/api/auth/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) {
-      return res.status(500).json({ success: false, message: 'Logout hatası' })
-    }
-    res.json({ success: true, message: 'Çıkış başarılı' })
-  })
+  res.json({ success: true, message: 'Çıkış başarılı' })
 })
 
 // Get current user info

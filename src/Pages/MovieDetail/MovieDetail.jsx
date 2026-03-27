@@ -253,6 +253,7 @@ const MovieDetail = () => {
         mediaType={mediaType}
         tmdbId={movieDetail?.id}
         title={displayTitle}
+        posterPath={movieDetail?.poster_path}
       />
     </div>
   )
