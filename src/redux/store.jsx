@@ -4,6 +4,7 @@ import movieListSliceReducer from './slices/movieListSlice'
 import movieDetailSliceReducers from './slices/movieDetailSlice'
 import tvDetailSliceReducer from './slices/tvDetailSlice'
 import favoritesSliceReducers from "./slices/favoritesSlice";
+import playerSliceReducer from './slices/playerSlice'
 
 export const store = configureStore({
     reducer: {
@@ -11,6 +12,7 @@ export const store = configureStore({
         movieList: movieListSliceReducer,
         movieDetail: movieDetailSliceReducers,
         tvDetail: tvDetailSliceReducer,
-        favorite: favoritesSliceReducers
+        favorite: favoritesSliceReducers,
+        player: playerSliceReducer
     }
 })

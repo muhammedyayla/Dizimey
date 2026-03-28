@@ -16,8 +16,13 @@ import 'swiper/css/navigation'
 import './WatchProviders.css'
 import ProviderContentCard from '../providerContentCard/ProviderContentCard'
 
-// Netflix'in TMDB provider_id'si 8'dir. Varsayılan olarak Netflix seçilir.
-const NETFLIX_ID = 8
+const ALLOWED_PROVIDERS = [
+  'Netflix',
+  'Amazon Prime Video',
+  'Disney Plus',
+  'Google Play Movies',
+  'HBO',
+]
 
 const WatchProviders = () => {
   const [providers, setProviders] = useState([])
@@ -37,14 +42,20 @@ const WatchProviders = () => {
           `${API_WATCH_PROVIDERS_URL}?api_key=${API_KEY}&watch_region=TR&language=tr-TR`
         )
         const sorted = (res.data.results || [])
-          .filter((p) => p.logo_path && p.provider_name)
+          .filter(
+            (p) =>
+              p.logo_path &&
+              p.provider_name &&
+              ALLOWED_PROVIDERS.some(
+                (allowed) => allowed.toLowerCase() === p.provider_name.toLowerCase()
+              )
+          )
           .sort((a, b) => (a.display_priority ?? 999) - (b.display_priority ?? 999))
-          .slice(0, 15) // Sadece ilk 15 provider'ı al
 
         setProviders(sorted)
 
         // Netflix'i varsayılan yap; yoksa ilk provider'ı seç
-        const netflix = sorted.find((p) => p.provider_id === NETFLIX_ID) || sorted[0]
+        const netflix = sorted.find((p) => p.provider_name?.toLowerCase() === 'netflix') || sorted[0]
         if (netflix) setSelectedProvider(netflix)
       } catch (error) {
         console.error('Yayın platformları yüklenirken hata:', error)

@@ -6,14 +6,21 @@ import CardTrailerOverlay from '../common/CardTrailerOverlay'
 import { FaStar } from 'react-icons/fa6'
 import './ProviderContentCard.css'
 
+const getBackdropUrl = (path) =>
+  path ? `https://wsrv.nl/?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Fw780${path}&output=webp&q=65&n=-1` : null
+
 const ProviderContentCard = ({ item }) => {
   const { id, media_type, poster_path, backdrop_path, vote_average } = item
   const title = item.title || item.name || item.original_title || item.original_name
   const rating = vote_average ? vote_average.toFixed(1) : '—'
   const to = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
   const mediaTypeLabel = media_type === 'tv' ? 'SERIES' : 'MOVIE'
+  
+  const imageSrc = getBackdropUrl(backdrop_path) || getBackdropUrl(poster_path) || ''
 
-  const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = useTrailerHover(id, media_type)
+  const { isHovered, showVideo, trailerUrl, titleBackdrop, handleMouseEnter, handleMouseLeave } = 
+    useTrailerHover(id, media_type, backdrop_path)
+  
   const [isTitleVisible, setIsTitleVisible] = useState(false)
 
   useEffect(() => {
@@ -38,7 +45,7 @@ const ProviderContentCard = ({ item }) => {
       <div className='provider-content-card__poster-wrapper'>
         <div
           className='provider-content-card__poster'
-          style={{ backgroundImage: `url(${API_IMG}/${poster_path || backdrop_path})` }}
+          style={{ backgroundImage: `url(${titleBackdrop || imageSrc})` }}
         >
           {/* Video Trailer Overlay */}
           <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={title} />

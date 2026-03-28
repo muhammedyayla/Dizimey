@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import './navbar.css'
-import { HOME, MY_LIST, SEARCH } from '../../constants/path'
+import { HOME, MY_LIST } from '../../constants/path'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { MdSearch } from 'react-icons/md'
 import AuthModal from '../authModal/AuthModal'
 import UserMenu from '../userMenu/UserMenu'
 import axios from 'axios'
+import SearchModal from '../searchModal/SearchModal'
 
 const navLinks = [
   { label: 'Ana Sayfa', to: HOME },
@@ -17,7 +18,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001
 
 const Navbar = () => {
   const { movies } = useSelector((store) => store.favorite)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [user, setUser] = useState(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
@@ -63,15 +64,6 @@ const Navbar = () => {
     window.location.reload()
   }
 
-  const handleSearch = (event) => {
-    event.preventDefault()
-    const trimmed = searchTerm.trim()
-    if (!trimmed) return
-    const params = new URLSearchParams({ q: trimmed, page: '1' })
-    navigate(`${SEARCH}?${params.toString()}`)
-    setSearchTerm('')
-  }
-
   return (
     <header className='top-nav'>
       <div className='top-nav__brand'>
@@ -97,16 +89,15 @@ const Navbar = () => {
         ))}
       </nav>
       <div className='top-nav__actions'>
-        <form className='top-nav__search' onSubmit={handleSearch}>
-          <MdSearch aria-hidden="true" />
-          <input
-            type="search"
-            placeholder='Ara...'
-            aria-label='Site içi arama'
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
-        </form>
+        {/* Search Modal Trigger */}
+        <button 
+          className='top-nav__search-btn' 
+          onClick={() => setIsSearchModalOpen(true)}
+          aria-label='Search'
+        >
+          <MdSearch />
+        </button>
+
         {user ? (
           <UserMenu user={user} onLogout={handleLogout} />
         ) : (
@@ -118,6 +109,12 @@ const Navbar = () => {
           />
         )}
       </div>
+
+      <SearchModal 
+        open={isSearchModalOpen} 
+        onClose={() => setIsSearchModalOpen(false)} 
+      />
+
       <AuthModal 
         open={isAuthModalOpen} 
         onClose={() => setIsAuthModalOpen(false)}

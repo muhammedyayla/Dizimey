@@ -12,7 +12,7 @@ import { API_IMG } from '../../constants/api'
 import { getAllContinueEntries } from '../../constants/playerProgress'
 import Loading from '../../components/Loading/Loading'
 import { Link } from 'react-router-dom'
-import PlayerModal from '../../components/player/PlayerModal'
+import { setPlayerConfig } from '../../redux/slices/playerSlice'
 import TopRankCard from '../../components/topRankCard/TopRankCard'
 
 const getEnglishTitle = (item) =>
@@ -26,17 +26,6 @@ const Home = () => {
   const [isFetching, setIsFetching] = useState(false)
   const [topRatedTab, setTopRatedTab] = useState('movies')
   const [continueEntries, setContinueEntries] = useState([])
-
-  // Player state
-  const [playerConfig, setPlayerConfig] = useState({
-    open: false,
-    mediaType: 'movie',
-    tmdbId: null,
-    title: '',
-    season: 1,
-    episode: 1,
-    posterPath: ''
-  })
 
   useEffect(() => {
     let isMounted = true
@@ -92,27 +81,25 @@ const Home = () => {
   }
 
   const handleContinueClick = (entry) => {
-    setPlayerConfig({
-      open: true,
+    dispatch(setPlayerConfig({
       mediaType: entry.type === 'movie' ? 'movie' : 'tv',
       tmdbId: entry.id,
       title: entry.title,
       season: entry.season || 1,
       episode: entry.episode || 1,
       posterPath: entry.poster_path
-    })
+    }))
   }
 
   const handlePlay = (movie) => {
-    setPlayerConfig({
-      open: true,
+    dispatch(setPlayerConfig({
       mediaType: movie.media_type || (movie.first_air_date ? 'tv' : 'movie'),
       tmdbId: movie.id,
       title: movie.title || movie.name,
       season: 1,
       episode: 1,
       posterPath: movie.poster_path
-    })
+    }))
   }
 
   return (
@@ -124,11 +111,11 @@ const Home = () => {
           {continueEntries.map((entry) => {
             const progress = Math.min(100, Math.max(0, ((entry.time || 0) / (entry.duration || 1)) * 100))
             const posterUrl = entry.poster_path ? `${API_IMG}/${entry.poster_path}` : ''
-            
+
             return (
-              <div 
-                key={entry.key} 
-                className='continue-card' 
+              <div
+                key={entry.key}
+                className='continue-card'
                 onClick={() => handleContinueClick(entry)}
               >
                 <div
@@ -137,7 +124,7 @@ const Home = () => {
                 >
                   {!posterUrl && (
                     <div className="continue-card__placeholder">
-                       <span>{entry.title?.charAt(0) || '?'}</span>
+                      <span>{entry.title?.charAt(0) || '?'}</span>
                     </div>
                   )}
                   <button
@@ -162,11 +149,11 @@ const Home = () => {
 
       <SwiperSection titleBig="TOP 10" titleSmall="CONTENT TODAY" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
-          <TopRankCard 
-            key={movie.id} 
-            movie={movie} 
-            index={index} 
-            genre={getGenreName(movie.genre_ids)} 
+          <TopRankCard
+            key={movie.id}
+            movie={movie}
+            index={index}
+            genre={getGenreName(movie.genre_ids)}
           />
         ))}
       </SwiperSection>
@@ -177,9 +164,11 @@ const Home = () => {
         ))}
       </SwiperSection>
 
-      <section className='top-rated-section'>
-        <div className='top-rated-section__header'>
-          <h3>En Yüksek Puanlılar</h3>
+      <SwiperSection
+        title="En Yüksek Puanlılar"
+        slidesPerView="auto"
+        spaceBetween={16}
+        headerRight={
           <Tabs
             value={topRatedTab}
             onChange={setTopRatedTab}
@@ -188,19 +177,18 @@ const Home = () => {
               { value: 'tv', label: 'Diziler' },
             ]}
           />
-        </div>
-        <SwiperSection title="" slidesPerView="auto" spaceBetween={16}>
-          {topRatedList.length > 0 ? (
-            topRatedList.slice(0, 20).map((item) => (
-              <MovieCard key={item.id} movie={{ ...item, media_type: topRatedTab === 'movies' ? 'movie' : 'tv' }} />
-            ))
-          ) : (
-            <div className='state'>
-              <Loading />
-            </div>
-          )}
-        </SwiperSection>
-      </section>
+        }
+      >
+        {topRatedList.length > 0 ? (
+          topRatedList.slice(0, 20).map((item) => (
+            <MovieCard key={item.id} movie={{ ...item, media_type: topRatedTab === 'movies' ? 'movie' : 'tv' }} />
+          ))
+        ) : (
+          <div className='state'>
+            <Loading />
+          </div>
+        )}
+      </SwiperSection>
 
       <WatchProviders />
 
@@ -219,17 +207,6 @@ const Home = () => {
           )}
         </SwiperSection>
       )}
-
-      <PlayerModal
-        open={playerConfig.open}
-        onClose={() => setPlayerConfig(prev => ({ ...prev, open: false }))}
-        mediaType={playerConfig.mediaType}
-        tmdbId={playerConfig.tmdbId}
-        title={playerConfig.title}
-        season={playerConfig.season}
-        episode={playerConfig.episode}
-        posterPath={playerConfig.posterPath}
-      />
     </div>
   )
 }

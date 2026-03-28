@@ -4,12 +4,37 @@
 }
 
 .swiper-section__header {
-    margin-bottom: 18px;
+    margin-bottom: 24px;
+    font-weight: 700;
+}
+
+.swiper-section__header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
 }
 
 .swiper-section__header h3 {
     margin: 0;
     font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.swiper-section__header h3::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 1em;
+    background-color: #ea2a33;
+    border-radius: 2px;
+    margin-right: 12px;
+}
+
+.swiper-section__header--top10 h3::before {
+    display: none;
 }
 
 .swiper-section__titles-group {

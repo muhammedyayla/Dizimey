@@ -6,8 +6,8 @@ import { getMovieById } from '../../redux/slices/movieDetailSlice'
 import { API_IMG, API_MOVIE_VIDEOS_URL, API_MOVIE_IMAGES_URL, API_KEY } from '../../constants/api'
 import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { MdPlayArrow, MdAdd, MdCheck } from 'react-icons/md'
-import PlayerModal from '../../components/player/PlayerModal'
 import RecommendCard from '../../components/recommendCard/RecommendCard'
+import { setPlayerConfig } from '../../redux/slices/playerSlice'
 import axios from 'axios'
 
 const MovieDetail = () => {
@@ -16,7 +16,6 @@ const MovieDetail = () => {
   const { movieDetail } = useSelector((store) => store.movieDetail)
   const { movies } = useSelector((store) => store.favorite)
   const [isFavorite, setIsFavorite] = useState(false)
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const [trailerKey, setTrailerKey] = useState(null)
   const [logoPath, setLogoPath] = useState(null)
 
@@ -154,7 +153,16 @@ const MovieDetail = () => {
             </div>
           )}
           <div className='detail-hero__actions'>
-            <button className='button button--primary' type='button' onClick={() => setIsPlayerOpen(true)}>
+            <button 
+              className='button button--primary' 
+              type='button' 
+              onClick={() => dispatch(setPlayerConfig({
+                mediaType: 'movie',
+                tmdbId: movieDetail?.id,
+                title: displayTitle,
+                posterPath: movieDetail?.poster_path
+              }))}
+            >
               <MdPlayArrow aria-hidden='true' />
               Oynat
             </button>
@@ -236,14 +244,6 @@ const MovieDetail = () => {
           )}
         </div>
       </section>
-      <PlayerModal
-        open={isPlayerOpen}
-        onClose={() => setIsPlayerOpen(false)}
-        mediaType={mediaType}
-        tmdbId={movieDetail?.id}
-        title={displayTitle}
-        posterPath={movieDetail?.poster_path}
-      />
     </div>
   )
 }

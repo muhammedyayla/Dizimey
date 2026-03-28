@@ -6,9 +6,9 @@ import { getTvById } from '../../redux/slices/tvDetailSlice'
 import { API_IMG, API_TV_FIND_URL, API_TV_VIDEOS_URL, API_TV_IMAGES_URL, API_KEY } from '../../constants/api'
 import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { MdPlayArrow, MdAdd, MdCheck, MdSearch } from 'react-icons/md'
-import PlayerModal from '../../components/player/PlayerModal'
 import RecommendCard from '../../components/recommendCard/RecommendCard'
 import { getContinueEntry } from '../../constants/playerProgress'
+import { setPlayerConfig } from '../../redux/slices/playerSlice'
 import axios from 'axios'
 
 const SeriesDetail = () => {
@@ -17,7 +17,6 @@ const SeriesDetail = () => {
   const { tvDetail } = useSelector((store) => store.tvDetail)
   const { movies } = useSelector((store) => store.favorite)
   const [isFavorite, setIsFavorite] = useState(false)
-  const [isPlayerOpen, setIsPlayerOpen] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState(1)
   const [episodeSearch, setEpisodeSearch] = useState('')
   const [selectedEpisode, setSelectedEpisode] = useState({ season: 1, episode: 1 })
@@ -115,7 +114,14 @@ const SeriesDetail = () => {
 
   const handlePlayEpisode = (seasonNum, episodeNum) => {
     setSelectedEpisode({ season: seasonNum, episode: episodeNum })
-    setIsPlayerOpen(true)
+    dispatch(setPlayerConfig({
+      mediaType: 'tv',
+      tmdbId: tvDetail?.id,
+      title: displayTitle,
+      season: seasonNum,
+      episode: episodeNum,
+      posterPath: tvDetail?.poster_path
+    }))
   }
 
   const seasons = tvDetail?.seasons || []
@@ -236,10 +242,7 @@ const SeriesDetail = () => {
             <button
               className='button button--primary'
               type='button'
-              onClick={() => {
-                setSelectedEpisode({ season: 1, episode: 1 })
-                setIsPlayerOpen(true)
-              }}
+              onClick={() => handlePlayEpisode(1, 1)}
             >
               <MdPlayArrow aria-hidden='true' />
               Oynat
@@ -367,17 +370,6 @@ const SeriesDetail = () => {
         </div>
       </section>
 
-      <PlayerModal
-        open={isPlayerOpen}
-        onClose={() => setIsPlayerOpen(false)}
-        mediaType='tv'
-        tmdbId={tvDetail?.id}
-        title={displayTitle}
-        season={selectedEpisode.season}
-        episode={selectedEpisode.episode}
-        posterPath={tvDetail?.poster_path}
-        onPlayerEvent={handlePlayerEvent}
-      />
       {isEpisodePickerOpen && (
         <div className='episode-picker'>
           <button type='button' className='episode-picker__backdrop' onClick={() => setIsEpisodePickerOpen(false)} />

@@ -6,7 +6,7 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import './SwiperSection.css'
 
-const SwiperSection = ({ title, titleBig, titleSmall, children, slidesPerView = 'auto', spaceBetween = 16 }) => {
+const SwiperSection = ({ title, titleBig, titleSmall, children, headerRight, slidesPerView = 'auto', spaceBetween = 16 }) => {
   const [swiper, setSwiper] = useState(null)
   const prevRef = useRef(null)
   const nextRef = useRef(null)
@@ -22,15 +22,18 @@ const SwiperSection = ({ title, titleBig, titleSmall, children, slidesPerView = 
 
   return (
     <section className='swiper-section'>
-      <div className='swiper-section__header'>
-        {titleBig && titleSmall ? (
-          <div className='swiper-section__titles-group'>
-            <h1 className='swiper-section__title-big'>{titleBig}</h1>
-            <h3 className='swiper-section__title-small'>{titleSmall}</h3>
-          </div>
-        ) : (
-          <h3>{title}</h3>
-        )}
+      <div className={`swiper-section__header ${titleBig && titleSmall ? 'swiper-section__header--top10' : ''}`}>
+        <div className='swiper-section__header-content'>
+          {titleBig && titleSmall ? (
+            <div className='swiper-section__titles-group'>
+              <h1 className='swiper-section__title-big'>{titleBig}</h1>
+              <h3 className='swiper-section__title-small'>{titleSmall}</h3>
+            </div>
+          ) : (
+            <h3>{title}</h3>
+          )}
+          {headerRight && <div className='swiper-section__header-right'>{headerRight}</div>}
+        </div>
       </div>
       <div className='swiper-section__container'>
         <button ref={prevRef} className='swiper-section__nav-btn swiper-section__nav-btn--prev' aria-label='Önceki'>

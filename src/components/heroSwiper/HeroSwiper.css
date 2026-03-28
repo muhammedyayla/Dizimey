@@ -1,6 +1,6 @@
 .hero-swiper {
     position: relative;
-    height: clamp(480px, 70vh, 720px);
+    height: clamp(680px, 80vh, 1020px);
     border-radius: 28px;
     margin-bottom: 16px clamp(16px, 4vw, 64px) 0;
     margin-top: 16px clamp(16px, 4vw, 64px) 0;
@@ -114,29 +114,29 @@
     margin: 1.5rem 0 0;
     opacity: 0.95;
     letter-spacing: 0.2px;
-  
+
     /* Maksimum 6 cümle gösterir */
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 6;
     -webkit-box-orient: vertical;
     text-overflow: ellipsis;
-  }
-  
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
     .hero-swiper__description {
-      max-width: 860px;
-      font-size: 1.1rem;
+        max-width: 860px;
+        font-size: 1.1rem;
     }
-  }
-  
-  @media (min-width: 1200px) {
+}
+
+@media (min-width: 1200px) {
     .hero-swiper__description {
-      max-width: 960px;
-      font-size: 1.15rem;
-      line-height: 1.7;
+        max-width: 960px;
+        font-size: 1.15rem;
+        line-height: 1.7;
     }
-  }
+}
 
 .hero-swiper__meta {
     display: flex;
@@ -192,4 +192,3 @@
 .hero-swiper__nav--next {
     right: clamp(5px, 3vw, 5px);
 }
-

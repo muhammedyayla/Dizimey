@@ -12,9 +12,14 @@ import Search from './Pages/Search/Search'
 
 import { Route, Routes, useLocation } from 'react-router-dom'
 import { HOME, MY_LIST, MOVIE_DETAIL, TV_DETAIL, SEARCH } from './constants/path'
+import { useSelector, useDispatch } from 'react-redux'
+import PlayerModal from './components/player/PlayerModal'
+import { closePlayer } from './redux/slices/playerSlice'
 
 function App() {
   const { pathname } = useLocation()
+  const dispatch = useDispatch()
+  const player = useSelector((state) => state.player)
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -31,6 +36,17 @@ function App() {
         <Route path={SEARCH} element={<Search />} />
       </Routes>
       <Footer />
+
+      <PlayerModal
+        open={player.open}
+        onClose={() => dispatch(closePlayer())}
+        mediaType={player.mediaType}
+        tmdbId={player.tmdbId}
+        title={player.title}
+        season={player.season}
+        episode={player.episode}
+        posterPath={player.posterPath}
+      />
     </div>
   )
 }
