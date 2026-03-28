@@ -14,6 +14,7 @@ import axios from 'axios'
 import 'swiper/css'
 import 'swiper/css/navigation'
 import './WatchProviders.css'
+import ProviderContentCard from '../providerContentCard/ProviderContentCard'
 
 // Netflix'in TMDB provider_id'si 8'dir. Varsayılan olarak Netflix seçilir.
 const NETFLIX_ID = 8
@@ -155,31 +156,11 @@ const WatchProviders = () => {
             onSwiper={setSwiper}
             className='swiper-section__swiper'
           >
-            {content.map((item) => {
-              const title = item.title || item.name || item.original_title || item.original_name
-              const year =
-                item.release_date || item.first_air_date
-                  ? new Date(item.release_date || item.first_air_date).getFullYear()
-                  : null
-              const to = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`
-
-              return (
-                <SwiperSlide key={`${item.media_type}-${item.id}`} className='swiper-section__slide'>
-                  <Link to={to} className='provider-content-card'>
-                    <div
-                      className='provider-content-card__poster'
-                      style={{ backgroundImage: `url(${API_IMG}/${item.poster_path})` }}
-                    >
-                      <span className='provider-content-card__badge'>
-                        {item.media_type === 'tv' ? 'Dizi' : 'Film'}
-                      </span>
-                    </div>
-                    <p className='provider-content-card__title'>{title}</p>
-                    {year && <span className='provider-content-card__year'>{year}</span>}
-                  </Link>
-                </SwiperSlide>
-              )
-            })}
+            {content.map((item) => (
+              <SwiperSlide key={`${item.media_type}-${item.id}`} className='swiper-section__slide'>
+                <ProviderContentCard item={item} />
+              </SwiperSlide>
+            ))}
           </Swiper>
           <button
             ref={(node) => setNextEl(node)}

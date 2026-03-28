@@ -12,6 +12,36 @@
     font-size: 1.4rem;
 }
 
+.swiper-section__titles-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 24px;
+}
+
+.swiper-section__title-big {
+    font-size: clamp(3rem, 7vw, 6rem);
+    font-weight: 500;
+    font-family: 'Impact', 'Arial Black', sans-serif;
+    color: transparent;
+    -webkit-text-stroke: 3px #e50914;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 0.9;
+    margin: 0;
+}
+
+.swiper-section__title-small {
+    font-size: clamp(0.6rem, 1.2vw, 0.85rem);
+    font-weight: 700;
+    color: #ffffff;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    line-height: 1.4;
+    margin: 0;
+    opacity: 0.9;
+}
+
 .swiper-section__container {
     position: relative;
     display: flex;
@@ -67,4 +97,3 @@
         font-size: 1.3rem;
     }
 }
-

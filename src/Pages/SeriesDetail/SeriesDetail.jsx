@@ -7,6 +7,7 @@ import { API_IMG, API_TV_FIND_URL, API_TV_VIDEOS_URL, API_TV_IMAGES_URL, API_KEY
 import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { MdPlayArrow, MdAdd, MdCheck, MdSearch } from 'react-icons/md'
 import PlayerModal from '../../components/player/PlayerModal'
+import RecommendCard from '../../components/recommendCard/RecommendCard'
 import { getContinueEntry } from '../../constants/playerProgress'
 import axios from 'axios'
 
@@ -190,7 +191,7 @@ const SeriesDetail = () => {
   }
 
   const cast = tvDetail?.credits?.cast?.slice(0, 6) || []
-  const similar = tvDetail?.similar?.results?.slice(0, 6) || []
+  const similar = tvDetail?.similar?.results?.slice(0, 14) || []
 
   const heroImage = tvDetail?.backdrop_path || tvDetail?.poster_path
 
@@ -356,19 +357,9 @@ const SeriesDetail = () => {
           </h2>
           <div className='recommendations-grid'>
             {similar.length ? (
-              similar.map((item) => {
-                const itemPath = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`
-                return (
-                  <Link key={item.id} to={itemPath} className='recommend-card'>
-                    <div
-                      className='recommend-card__media'
-                      style={{
-                        backgroundImage: `url(${API_IMG}/${item.poster_path || item.backdrop_path})`,
-                      }}
-                    />
-                  </Link>
-                )
-              })
+              similar.map((item) => (
+                <RecommendCard key={item.id} item={{ ...item, media_type: item.media_type || 'tv' }} />
+              ))
             ) : (
               <p className='empty-state'>Benzer içerik bulunamadı.</p>
             )}

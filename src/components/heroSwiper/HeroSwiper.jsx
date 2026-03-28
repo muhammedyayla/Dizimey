@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useState } from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Autoplay, Navigation, EffectFade } from 'swiper/modules'
 import { MdChevronLeft, MdChevronRight, MdInfoOutline, MdPlayArrow } from 'react-icons/md'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { API_IMG, API_MOVIE_IMAGES_URL, API_TV_IMAGES_URL, API_KEY } from '../../constants/api'
 import axios from 'axios'
 import 'swiper/css'
@@ -13,11 +13,12 @@ import './HeroSwiper.css'
 const getEnglishTitle = (item) =>
   item?.title || item?.name || item?.original_title || item?.original_name || ''
 
-const HeroSwiper = ({ movies, genres }) => {
+const HeroSwiper = ({ movies, genres, onPlay }) => {
   const [swiper, setSwiper] = useState(null)
   const prevRef = useRef(null)
   const nextRef = useRef(null)
   const [logos, setLogos] = useState({})
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (swiper && prevRef.current && nextRef.current) {
@@ -98,12 +99,18 @@ const HeroSwiper = ({ movies, genres }) => {
 
           const heroMetaItems = []
           if (heroGenres) heroMetaItems.push(heroGenres)
-          if (movie?.release_date) {
-            heroMetaItems.push(new Date(movie.release_date).getFullYear())
-          } else if (movie?.first_air_date) {
-            heroMetaItems.push(new Date(movie.first_air_date).getFullYear())
-          }
+          const year = movie?.release_date || movie?.first_air_date ? new Date(movie.release_date || movie.first_air_date).getFullYear() : ''
+          if (year) heroMetaItems.push(year)
           if (movie?.vote_average) heroMetaItems.push(`${movie.vote_average.toFixed(1)} IMDb`)
+
+          const handlePlayClick = () => {
+            if (onPlay) onPlay(movie)
+          }
+
+          const handleInfoClick = () => {
+            const path = movie.media_type === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`
+            navigate(path)
+          }
 
           return (
             <SwiperSlide key={movie.id} className='hero-swiper__slide'>
@@ -134,12 +141,14 @@ const HeroSwiper = ({ movies, genres }) => {
                     </div>
                   )}
                   <div className='hero-swiper__actions'>
-                    {movie && (
-                      <Link to={movie.media_type === 'tv' ? `/tv/${movie.id}` : `/movie/${movie.id}`} className='button button--primary'>
-                        <MdPlayArrow aria-hidden='true' />
-                        Oynat
-                      </Link>
-                    )}
+                    <button type="button" className='button button--primary' onClick={handlePlayClick}>
+                      <MdPlayArrow aria-hidden='true' />
+                      Oynat
+                    </button>
+                    <button type="button" className='button button--secondary' onClick={handleInfoClick}>
+                      <MdInfoOutline aria-hidden='true' />
+                      Daha Fazla Bilgi
+                    </button>
                   </div>
                 </div>
                 {movie?.poster_path && (

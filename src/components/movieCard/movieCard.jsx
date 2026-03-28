@@ -3,6 +3,8 @@ import { API_IMG } from '../../constants/api'
 import './movieCard.css'
 import { FaStar } from 'react-icons/fa6'
 import { Link } from 'react-router-dom'
+import useTrailerHover from '../../hooks/useTrailerHover'
+import CardTrailerOverlay from '../common/CardTrailerOverlay'
 
 const MovieCard = ({ movie }) => {
   const { id, vote_average, poster_path, media_type } = movie
@@ -10,21 +12,42 @@ const MovieCard = ({ movie }) => {
   const displayTitle =
     movie?.title || movie?.name || movie?.original_title || movie?.original_name || 'İsimsiz İçerik'
   const imageSrc = poster_path ? `${API_IMG}/${poster_path}` : ''
-  const mediaTypeLabel = media_type === 'tv' ? 'TV Show' : 'Movie'
+  const mediaTypeLabel = media_type === 'tv' ? 'SERIES' : 'MOVIE'
   
   const detailPath = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
 
+  const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = useTrailerHover(id, media_type)
+
   return (
-    <Link to={detailPath} className='movie-card'>
+    <Link 
+      to={detailPath} 
+      className={`movie-card ${isHovered ? 'is-hovered' : ''}`}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <div className='movie-card__media'>
+        {/* Poster */}
         {imageSrc ? (
-          <img src={imageSrc} alt={displayTitle} loading='lazy' />
+          <img src={imageSrc} alt={displayTitle} loading='lazy' className={showVideo ? 'hidden' : ''} />
         ) : (
           <div className='movie-card__placeholder' aria-hidden="true">
             {displayTitle.charAt(0)}
           </div>
         )}
-        <div className='movie-card__overlay' />
+
+        {/* Video Trailer Overlay */}
+        <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={displayTitle} />
+
+        {/* Top Badges (Permanent) */}
+        <div className='movie-card__badge movie-card__badge--type'>
+          {mediaTypeLabel}
+        </div>
+        <div className='movie-card__badge movie-card__badge--rating'>
+          <FaStar aria-hidden="true" />
+          <span>{rating}</span>
+        </div>
+
+        {/* Footer Info (Hover Only) */}
         <div className='movie-card__hover-info'>
           <h4 className='movie-card__hover-title'>{displayTitle}</h4>
           <div className='movie-card__hover-meta'>
@@ -34,10 +57,6 @@ const MovieCard = ({ movie }) => {
               <span>{rating}</span>
             </div>
           </div>
-        </div>
-        <div className='movie-card__rating'>
-          <FaStar aria-hidden="true" />
-          <span>{rating}</span>
         </div>
       </div>
     </Link>

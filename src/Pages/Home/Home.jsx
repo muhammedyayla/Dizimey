@@ -12,6 +12,8 @@ import { API_IMG } from '../../constants/api'
 import { getAllContinueEntries } from '../../constants/playerProgress'
 import Loading from '../../components/Loading/Loading'
 import { Link } from 'react-router-dom'
+import PlayerModal from '../../components/player/PlayerModal'
+import TopRankCard from '../../components/topRankCard/TopRankCard'
 
 const getEnglishTitle = (item) =>
   item?.title || item?.name || item?.original_title || item?.original_name || ''
@@ -24,6 +26,17 @@ const Home = () => {
   const [isFetching, setIsFetching] = useState(false)
   const [topRatedTab, setTopRatedTab] = useState('movies')
   const [continueEntries, setContinueEntries] = useState([])
+
+  // Player state
+  const [playerConfig, setPlayerConfig] = useState({
+    open: false,
+    mediaType: 'movie',
+    tmdbId: null,
+    title: '',
+    season: 1,
+    episode: 1,
+    posterPath: ''
+  })
 
   useEffect(() => {
     let isMounted = true
@@ -59,6 +72,13 @@ const Home = () => {
     setContinueEntries(getAllContinueEntries())
   }, [])
 
+  // Genre ID'den isim bulma yardımcısı
+  const getGenreName = (genreIds) => {
+    if (!genreIds || genreIds.length === 0) return ''
+    const genre = genres.find(g => g.id === genreIds[0])
+    return genre ? genre.name : ''
+  }
+
   const featuredMovies = useMemo(() => trending.slice(0, 10), [trending])
   const topTen = useMemo(() => movieList.slice(0, 10), [movieList])
   const trendingNow = useMemo(() => movieList.slice(10, 16), [movieList])
@@ -71,25 +91,55 @@ const Home = () => {
     setContinueEntries((prev) => prev.filter((item) => item.key !== entryKey))
   }
 
+  const handleContinueClick = (entry) => {
+    setPlayerConfig({
+      open: true,
+      mediaType: entry.type === 'movie' ? 'movie' : 'tv',
+      tmdbId: entry.id,
+      title: entry.title,
+      season: entry.season || 1,
+      episode: entry.episode || 1,
+      posterPath: entry.poster_path
+    })
+  }
+
+  const handlePlay = (movie) => {
+    setPlayerConfig({
+      open: true,
+      mediaType: movie.media_type || (movie.first_air_date ? 'tv' : 'movie'),
+      tmdbId: movie.id,
+      title: movie.title || movie.name,
+      season: 1,
+      episode: 1,
+      posterPath: movie.poster_path
+    })
+  }
+
   return (
     <div className='home'>
-      <HeroSwiper movies={featuredMovies} genres={genres} />
+      <HeroSwiper movies={featuredMovies} genres={genres} onPlay={handlePlay} />
 
       {continueEntries.length > 0 && (
-        <SwiperSection title="Continue Watching" slidesPerView="auto" spaceBetween={16}>
+        <SwiperSection title="Continue Watching" slidesPerView="auto" spaceBetween={20}>
           {continueEntries.map((entry) => {
             const progress = Math.min(100, Math.max(0, ((entry.time || 0) / (entry.duration || 1)) * 100))
-            const path =
-              entry.type === 'movie'
-                ? `/movie/${entry.id}`
-                : `/tv/${entry.id}`
-
+            const posterUrl = entry.poster_path ? `${API_IMG}/${entry.poster_path}` : ''
+            
             return (
-              <Link key={entry.key} to={path} className='continue-card'>
+              <div 
+                key={entry.key} 
+                className='continue-card' 
+                onClick={() => handleContinueClick(entry)}
+              >
                 <div
                   className='continue-card__media'
-                  style={{ backgroundImage: entry.poster_path ? `url(${API_IMG}/${entry.poster_path})` : undefined }}
+                  style={{ backgroundImage: posterUrl ? `url(${posterUrl})` : undefined }}
                 >
+                  {!posterUrl && (
+                    <div className="continue-card__placeholder">
+                       <span>{entry.title?.charAt(0) || '?'}</span>
+                    </div>
+                  )}
                   <button
                     type='button'
                     className='continue-card__remove'
@@ -102,35 +152,28 @@ const Home = () => {
                     <div className='continue-card__progress-bar' style={{ width: `${progress}%` }} />
                   </div>
                 </div>
-                <p>{entry.title || 'Untitled'}</p>
-              </Link>
+                <p title={entry.title}>{entry.title || 'Adsız İçerik'}</p>
+              </div>
             )
           })}
         </SwiperSection>
       )}
 
-      <SwiperSection titleBig="TOP 10" titleSmall="CONTENT TODAY"  slidesPerView="auto" spaceBetween={16}>
+
+      <SwiperSection titleBig="TOP 10" titleSmall="CONTENT TODAY" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (
-          <Link key={movie.id} to={`/movie/${movie.id}`} className='top-rank-card'>
-            <span className='top-rank-card__number'>{index + 1}</span>
-            <div
-              className='top-rank-card__poster'
-              style={{ backgroundImage: `url(${API_IMG}/${movie.poster_path})` }}
-            />
-          </Link>
+          <TopRankCard 
+            key={movie.id} 
+            movie={movie} 
+            index={index} 
+            genre={getGenreName(movie.genre_ids)} 
+          />
         ))}
       </SwiperSection>
 
       <SwiperSection title="Bu Haftanın Trend Olanları" slidesPerView="auto" spaceBetween={16}>
         {trendingNow.map((movie) => (
-          <Link key={movie.id} to={`/movie/${movie.id}`} className='trend-card'>
-            <div
-              className='trend-card__media'
-              style={{
-                backgroundImage: `url(${API_IMG}/${movie.backdrop_path || movie.poster_path})`,
-              }}
-            />
-          </Link>
+          <MovieCard key={movie.id} movie={{ ...movie, media_type: movie.media_type || 'movie' }} />
         ))}
       </SwiperSection>
 
@@ -141,8 +184,8 @@ const Home = () => {
             value={topRatedTab}
             onChange={setTopRatedTab}
             tabs={[
-              { value: 'movies', label: 'Movies' },
-              { value: 'tv', label: 'TV Series' }
+              { value: 'movies', label: 'Filmler' },
+              { value: 'tv', label: 'Diziler' },
             ]}
           />
         </div>
@@ -176,6 +219,17 @@ const Home = () => {
           )}
         </SwiperSection>
       )}
+
+      <PlayerModal
+        open={playerConfig.open}
+        onClose={() => setPlayerConfig(prev => ({ ...prev, open: false }))}
+        mediaType={playerConfig.mediaType}
+        tmdbId={playerConfig.tmdbId}
+        title={playerConfig.title}
+        season={playerConfig.season}
+        episode={playerConfig.episode}
+        posterPath={playerConfig.posterPath}
+      />
     </div>
   )
 }

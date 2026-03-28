@@ -1,0 +1,102 @@
+.provider-content-card {
+    display: flex;
+    flex-direction: column;
+    width: 180px;
+    gap: 12px;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.provider-content-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    z-index: 10;
+}
+
+.provider-content-card__poster-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #1a1a1f;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.provider-content-card__poster {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.provider-content-card__badge {
+    position: absolute;
+    top: 10px;
+    z-index: 5;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
+}
+
+.provider-content-card__badge--type {
+    left: 10px;
+    background: rgba(234, 42, 51, 0.85);
+    color: #fff;
+}
+
+.provider-content-card__badge--rating {
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffcb39;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.provider-content-card:hover .provider-content-card__badge {
+    opacity: 0;
+}
+
+.provider-content-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.provider-content-card:hover .provider-content-card__overlay {
+    opacity: 0;
+}
+
+.provider-content-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.provider-content-card__title {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.provider-content-card__year {
+    font-size: 0.8rem;
+    color: var(--color-muted);
+}
+
+@media (max-width: 640px) {
+    .provider-content-card {
+        width: 42vw;
+    }
+}

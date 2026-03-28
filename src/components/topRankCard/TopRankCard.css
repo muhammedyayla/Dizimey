@@ -1,0 +1,126 @@
+.top-rank-card {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    flex-shrink: 0;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    padding-left: 20px;
+}
+
+.top-rank-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    z-index: 10;
+}
+
+.top-rank-card__number {
+    font-size: clamp(4rem, 10vw, 8rem);
+    font-weight: 900;
+    color: rgba(234, 42, 51, 0.7);
+    line-height: 1;
+    z-index: 1;
+    user-select: none;
+    pointer-events: none;
+    mix-blend-mode: plus-lighter;
+    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.15);
+}
+
+.top-rank-card__poster-wrapper {
+    width: 170px;
+    aspect-ratio: 2 / 3;
+    border-radius: 12px;
+    margin-left: -45px;
+    z-index: 2;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background-color: transparent;
+}
+
+.top-rank-card__poster {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    transition: transform 0.4s ease;
+}
+
+.top-rank-card:hover .top-rank-card__poster {
+    transform: scale(1.1);
+}
+
+.top-rank-card__badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    color: #ffcb39;
+    font-size: 0.8rem;
+    font-weight: 700;
+    z-index: 5;
+    transition: opacity 0.3s ease;
+}
+
+.top-rank-card:hover .top-rank-card__badge {
+    opacity: 0;
+}
+
+.top-rank-card__hover {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0) 50%);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 3;
+}
+
+.top-rank-card:hover .top-rank-card__hover {
+    opacity: 1;
+}
+
+.top-rank-card__hover-left {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 75%;
+}
+
+.top-rank-card__hover-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.top-rank-card__hover-genre {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 600;
+}
+
+.top-rank-card__hover-year {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+@media (max-width: 768px) {
+    .top-rank-card__poster-wrapper {
+        width: 120px;
+        margin-left: -30px;
+    }
+}

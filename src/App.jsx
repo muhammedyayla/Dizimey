@@ -1,6 +1,6 @@
 import './App.css'
 import './css/reset.css'
-import React from 'react'
+import React, { useEffect } from 'react'
 
 import Navbar from './components/navbar/navbar'
 import Footer from './components/footer/footer'
@@ -10,10 +10,16 @@ import MovieDetail from './Pages/MovieDetail/MovieDetail'
 import SeriesDetail from './Pages/SeriesDetail/SeriesDetail'
 import Search from './Pages/Search/Search'
 
-import { Route, Routes } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import { HOME, MY_LIST, MOVIE_DETAIL, TV_DETAIL, SEARCH } from './constants/path'
 
 function App() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+
   return (
     <div className='app'>
       <Navbar />

@@ -205,14 +205,19 @@
 .detail-recommendations {
     display: flex;
     flex-direction: column;
-    gap: 18px;
-    padding: 0 clamp(16px, 4vw, 64px);
+    padding: 24px clamp(16px, 4vw, 64px) 64px;
+}
+
+.detail-recommendations h3 {
+    margin: 0 0 24px;
+    font-size: 1.4rem;
+    font-weight: 700;
 }
 
 .recommendations-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 12px;
 }
 
 .recommend-card {

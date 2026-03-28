@@ -7,6 +7,7 @@ import { API_IMG, API_MOVIE_VIDEOS_URL, API_MOVIE_IMAGES_URL, API_KEY } from '..
 import { addToFavorite, removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { MdPlayArrow, MdAdd, MdCheck } from 'react-icons/md'
 import PlayerModal from '../../components/player/PlayerModal'
+import RecommendCard from '../../components/recommendCard/RecommendCard'
 import axios from 'axios'
 
 const MovieDetail = () => {
@@ -74,7 +75,7 @@ const MovieDetail = () => {
     ['Writer', 'Screenplay', 'Story'].includes(person.job)
   )
   const cast = movieDetail?.credits?.cast?.slice(0, 6) || []
-  const similar = movieDetail?.similar?.results?.slice(0, 6) || []
+  const similar = movieDetail?.similar?.results?.slice(0, 14) || []
 
   const mediaType = 'movie'
   const displayTitle =
@@ -227,21 +228,9 @@ const MovieDetail = () => {
         <h3>Benzer İçerikler</h3>
         <div className='recommendations-grid'>
           {similar.length ? (
-            similar.map((item) => {
-              const itemPath = item.media_type === 'tv' ? `/tv/${item.id}` : `/movie/${item.id}`
-              const itemTitle = item.title || item.name || item.original_title || item.original_name
-              return (
-                <Link key={item.id} to={itemPath} className='recommend-card'>
-                  <div
-                    className='recommend-card__media'
-                    style={{
-                      backgroundImage: `url(${API_IMG}/${item.poster_path || item.backdrop_path})`,
-                    }}
-                  />
-                  <p>{itemTitle}</p>
-                </Link>
-              )
-            })
+            similar.map((item) => (
+              <RecommendCard key={item.id} item={{ ...item, media_type: item.media_type || 'movie' }} />
+            ))
           ) : (
             <p className='detail-body__text'>Benzer içerik bulunamadı.</p>
           )}

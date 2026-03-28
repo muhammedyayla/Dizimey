@@ -126,7 +126,7 @@ const PlayerModal = ({
     if (!open) return
     const blockContext = (e) => e.preventDefault()
     window.addEventListener('contextmenu', blockContext)
-    
+
     // Wrapper özelinde de dinleyiciyi ekle
     const el = playerWrapperRef.current
     if (el) el.addEventListener('contextmenu', blockContext)
@@ -198,6 +198,51 @@ const PlayerModal = ({
     [mediaType, tmdbId, season, episode, startTime, resumeTime]
   )
 
+  const [isPlaying, setIsPlaying] = useState(true)
+  const clickTimerRef = useRef(null)
+
+  const togglePlay = () => {
+    const iframe = playerWrapperRef.current?.querySelector('iframe')
+    if (!iframe) return
+
+    const newPlaying = !isPlaying
+    setIsPlaying(newPlaying)
+
+    // Yaygın player komutlarını gönderelim
+    const commands = [
+      JSON.stringify({ event: 'command', func: newPlaying ? 'playVideo' : 'pauseVideo' }),
+      JSON.stringify({ method: newPlaying ? 'play' : 'pause' }),
+      JSON.stringify({ type: 'PLAYER_COMMAND', data: newPlaying ? 'play' : 'pause' })
+    ]
+
+    commands.forEach(cmd => {
+      try {
+        iframe.contentWindow.postMessage(cmd, '*')
+      } catch (e) {
+        // sessizce geç
+      }
+    })
+  }
+
+  const clickCountRef = useRef(0)
+  const timerRef = useRef(null)
+
+  const handlePlayerClick = (e) => {
+    e.preventDefault()
+    clickCountRef.current += 1
+
+    if (clickCountRef.current === 1) {
+      timerRef.current = setTimeout(() => {
+        togglePlay()
+        clickCountRef.current = 0
+      }, 250)
+    } else if (clickCountRef.current === 2) {
+      clearTimeout(timerRef.current)
+      closePlayer()
+      clickCountRef.current = 0
+    }
+  }
+
   if (!open) return null
 
   return (
@@ -240,8 +285,11 @@ const PlayerModal = ({
         <div
           ref={playerWrapperRef}
           className='player-wrapper'
-          onDoubleClick={closePlayer}
         >
+          <div 
+            className='player-click-layer' 
+            onClick={handlePlayerClick}
+          />
           <iframe
             title='Media Player'
             src={src}

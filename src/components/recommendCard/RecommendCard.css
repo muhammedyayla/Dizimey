@@ -1,0 +1,90 @@
+.recommend-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.recommend-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    z-index: 10;
+}
+
+.recommend-card__media-wrapper {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #1a1a1f;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.recommend-card__media {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.recommend-card__badge {
+    position: absolute;
+    top: 10px;
+    z-index: 5;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
+}
+
+.recommend-card__badge--type {
+    left: 10px;
+    background: rgba(234, 42, 51, 0.8);
+    color: #fff;
+}
+
+.recommend-card__badge--rating {
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffcb39;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.recommend-card:hover .recommend-card__badge {
+    opacity: 0;
+}
+
+.recommend-card__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0) 70%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.recommend-card:hover .recommend-card__overlay {
+    opacity: 0;
+}
+
+.recommend-card__title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+    .recommend-card {
+        width: 44vw;
+    }
+}

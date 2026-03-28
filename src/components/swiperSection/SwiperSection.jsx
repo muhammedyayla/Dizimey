@@ -6,7 +6,7 @@ import 'swiper/css'
 import 'swiper/css/navigation'
 import './SwiperSection.css'
 
-const SwiperSection = ({ title, children, slidesPerView = 'auto', spaceBetween = 16 }) => {
+const SwiperSection = ({ title, titleBig, titleSmall, children, slidesPerView = 'auto', spaceBetween = 16 }) => {
   const [swiper, setSwiper] = useState(null)
   const prevRef = useRef(null)
   const nextRef = useRef(null)
@@ -23,7 +23,14 @@ const SwiperSection = ({ title, children, slidesPerView = 'auto', spaceBetween =
   return (
     <section className='swiper-section'>
       <div className='swiper-section__header'>
-        <h3>{title}</h3>
+        {titleBig && titleSmall ? (
+          <div className='swiper-section__titles-group'>
+            <h1 className='swiper-section__title-big'>{titleBig}</h1>
+            <h3 className='swiper-section__title-small'>{titleSmall}</h3>
+          </div>
+        ) : (
+          <h3>{title}</h3>
+        )}
       </div>
       <div className='swiper-section__container'>
         <button ref={prevRef} className='swiper-section__nav-btn swiper-section__nav-btn--prev' aria-label='Önceki'>
