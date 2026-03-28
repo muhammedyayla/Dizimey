@@ -7,7 +7,7 @@
 
 .top-rated-section {
     padding: 0 clamp(16px, 4vw, 64px);
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .top-rated-section__header {

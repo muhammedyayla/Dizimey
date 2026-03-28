@@ -90,7 +90,6 @@
 .provider-content-card__badge {
     position: absolute;
     top: 8px;
-    left: 8px;
     background-color: rgba(0, 0, 0, 0.65);
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.65rem;

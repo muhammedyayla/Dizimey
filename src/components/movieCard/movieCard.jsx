@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { API_IMG } from '../../constants/api'
 import './movieCard.css'
 import { FaStar } from 'react-icons/fa6'
@@ -11,12 +11,25 @@ const MovieCard = ({ movie }) => {
   const rating = vote_average ? vote_average.toFixed(1) : '—'
   const displayTitle =
     movie?.title || movie?.name || movie?.original_title || movie?.original_name || 'İsimsiz İçerik'
-  const imageSrc = poster_path ? `${API_IMG}/${poster_path}` : ''
+  const imageSrc = poster_path ? `${API_IMG}/${ poster_path || movie.backdrop_path }` : ''
   const mediaTypeLabel = media_type === 'tv' ? 'SERIES' : 'MOVIE'
   
   const detailPath = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
 
   const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = useTrailerHover(id, media_type)
+  const [isTitleVisible, setIsTitleVisible] = useState(false)
+
+  useEffect(() => {
+    let timeoutId
+    if (showVideo) {
+      timeoutId = setTimeout(() => {
+        setIsTitleVisible(true)
+      }, 1000)
+    } else {
+      setIsTitleVisible(false)
+    }
+    return () => clearTimeout(timeoutId)
+  }, [showVideo])
 
   return (
     <Link 
@@ -38,6 +51,11 @@ const MovieCard = ({ movie }) => {
         {/* Video Trailer Overlay */}
         <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={displayTitle} />
 
+        {/* Animated Title Overlay */}
+        <div className={`card__title ${isTitleVisible ? 'card__title--visible' : ''}`}>
+          {displayTitle}
+        </div>
+
         {/* Top Badges (Permanent) */}
         <div className='movie-card__badge movie-card__badge--type'>
           {mediaTypeLabel}
@@ -45,18 +63,6 @@ const MovieCard = ({ movie }) => {
         <div className='movie-card__badge movie-card__badge--rating'>
           <FaStar aria-hidden="true" />
           <span>{rating}</span>
-        </div>
-
-        {/* Footer Info (Hover Only) */}
-        <div className='movie-card__hover-info'>
-          <h4 className='movie-card__hover-title'>{displayTitle}</h4>
-          <div className='movie-card__hover-meta'>
-            <span className='movie-card__hover-type'>{mediaTypeLabel}</span>
-            <div className='movie-card__hover-rating'>
-              <FaStar aria-hidden="true" />
-              <span>{rating}</span>
-            </div>
-          </div>
         </div>
       </div>
     </Link>

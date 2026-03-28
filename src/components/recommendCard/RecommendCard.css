@@ -15,7 +15,7 @@
 .recommend-card__media-wrapper {
     position: relative;
     width: 100%;
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     overflow: hidden;
     background-color: #1a1a1f;
@@ -73,18 +73,9 @@
     opacity: 0;
 }
 
-.recommend-card__title {
-    margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--color-text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .recommend-card {
-        width: 44vw;
+        width: 45vw;
     }
 }

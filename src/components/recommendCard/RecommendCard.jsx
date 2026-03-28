@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { API_IMG } from '../../constants/api'
 import useTrailerHover from '../../hooks/useTrailerHover'
@@ -14,6 +14,19 @@ const RecommendCard = ({ item }) => {
   const mediaTypeLabel = media_type === 'tv' ? 'SERIES' : 'MOVIE'
 
   const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = useTrailerHover(id, media_type)
+  const [isTitleVisible, setIsTitleVisible] = useState(false)
+
+  useEffect(() => {
+    let timeoutId
+    if (showVideo) {
+      timeoutId = setTimeout(() => {
+        setIsTitleVisible(true)
+      }, 1000)
+    } else {
+      setIsTitleVisible(false)
+    }
+    return () => clearTimeout(timeoutId)
+  }, [showVideo])
 
   return (
     <Link 
@@ -29,6 +42,11 @@ const RecommendCard = ({ item }) => {
         >
           {/* Video Trailer Overlay */}
           <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={title} />
+          
+          {/* Animated Title Overlay */}
+          <div className={`card__title ${isTitleVisible ? 'card__title--visible' : ''}`}>
+            {title}
+          </div>
 
           {/* Top Badges */}
           <div className='recommend-card__badge recommend-card__badge--type'>
@@ -42,7 +60,6 @@ const RecommendCard = ({ item }) => {
           <div className='recommend-card__overlay' />
         </div>
       </div>
-      <p className='recommend-card__title'>{title}</p>
     </Link>
   )
 }
