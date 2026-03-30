@@ -1,16 +1,22 @@
 .top-nav {
-    position: sticky;
+    /* Navbar sits on top of hero and content */
+    --nav-height: 72px;
+    position: absolute;
     top: 0;
-    z-index: 50;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    height: var(--nav-height);
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 18px clamp(16px, 4vw, 48px);
-    background-color: rgba(12, 12, 15, 0.85);
-    backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--color-border);
+    background-color: transparent;
     gap: 24px;
+    transition: background 240ms ease, backdrop-filter 240ms ease, border-color 240ms ease;
 }
+
+
 
 .top-nav__brand {
     display: flex;

@@ -1,5 +1,5 @@
 .movie-card {
-    width: 22rem;
+    width: 14.5rem;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -15,7 +15,7 @@
 .movie-card__media {
     position: relative;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 2 / 3;
     border-radius: 12px;
     overflow: hidden;
     background-color: #1a1a1f;
@@ -58,9 +58,9 @@
     position: absolute;
     top: 12px;
     z-index: 5;
-    padding: 6px 12px;
+    padding: 4px 10px;
     border-radius: 10px;
-    font-size: 0.66rem;
+    font-size: 0.62rem;
     font-weight: 800;
     letter-spacing: 0.05em;
     backdrop-filter: blur(8px);

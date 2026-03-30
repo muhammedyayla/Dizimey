@@ -199,20 +199,20 @@
 }
 
 .continue-card {
-    width: 300px;
+    width: 12rem;
     flex-shrink: 0;
     cursor: pointer;
     transition: transform 0.2s ease;
 }
 
 .continue-card:hover {
-    transform: translateY(-4px);
+    transform: translateY(-6px);
 }
 
 .continue-card__media {
     position: relative;
     width: 100%;
-    aspect-ratio: 16 / 9;
+    aspect-ratio: 2 / 3;
     border-radius: 12px;
     overflow: hidden;
     background-size: cover;

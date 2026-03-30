@@ -56,6 +56,24 @@ const Navbar = () => {
     checkAuth()
   }, [])
 
+  // Toggle a class on the navbar when user scrolls, to add a subtle background
+  useEffect(() => {
+    const onScroll = () => {
+      const el = document.querySelector('.top-nav')
+      if (!el) return
+      if (window.scrollY > 50) {
+        el.classList.add('top-nav--scrolled')
+      } else {
+        el.classList.remove('top-nav--scrolled')
+      }
+    }
+
+    // run once to set initial state
+    onScroll()
+    window.addEventListener('scroll', onScroll)
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
