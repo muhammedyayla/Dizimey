@@ -103,7 +103,7 @@ input {
     max-width: 90%;
     overflow: hidden;
     text-overflow: ellipsis;
-    z-index: 10;
+    z-index: 25;
     font-size: 0.85rem;
     font-weight: 700;
     color: #fff;

@@ -1,8 +1,6 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { API_IMG } from '../../constants/api'
-import useTrailerHover from '../../hooks/useTrailerHover'
-import CardTrailerOverlay from '../common/CardTrailerOverlay'
 import { FaStar } from 'react-icons/fa6'
 import './TopRankCard.css'
 
@@ -13,14 +11,14 @@ const TopRankCard = ({ movie, index, genre }) => {
   const year = movie.release_date || movie.first_air_date ? new Date(movie.release_date || movie.first_air_date).getFullYear() : ''
   const itemPath = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
 
-  const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = useTrailerHover(id, media_type)
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <Link 
-      to={itemPath} 
+    <Link
+      to={itemPath}
       className={`top-rank-card ${isHovered ? 'is-hovered' : ''}`}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <span className='top-rank-card__number'>{index + 1}</span>
       <div className='top-rank-card__poster-wrapper'>
@@ -28,8 +26,7 @@ const TopRankCard = ({ movie, index, genre }) => {
           className='top-rank-card__poster'
           style={{ backgroundImage: `url(${API_IMG}/${poster_path})` }}
         >
-           {/* Video Trailer Overlay */}
-           <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={title} />
+
 
           {/* Top Badge (IMDb only for Top 10) */}
           <div className='top-rank-card__badge'>

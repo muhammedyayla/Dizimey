@@ -60,6 +60,8 @@
 
 .provider-content-card:hover .provider-content-card__badge {
     opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .provider-content-card__overlay {

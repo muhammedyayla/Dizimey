@@ -85,6 +85,8 @@
 
 .movie-card:hover .movie-card__badge {
     opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .movie-card__placeholder {

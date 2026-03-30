@@ -73,28 +73,24 @@ const WatchProviders = () => {
     try {
       const [moviesRes, tvRes] = await Promise.all([
         axios.get(
-          `${API_DISCOVER_MOVIE_URL}?api_key=${API_KEY}&watch_region=TR&with_watch_providers=${providerId}&sort_by=release_date.desc&language=tr-TR&page=1`
+          `${API_DISCOVER_MOVIE_URL}?api_key=${API_KEY}&watch_region=TR&with_watch_providers=${providerId}&sort_by=popularity.desc&language=tr-TR&page=1`
         ),
         axios.get(
-          `${API_DISCOVER_TV_URL}?api_key=${API_KEY}&watch_region=TR&with_watch_providers=${providerId}&sort_by=first_air_date.desc&language=tr-TR&page=1`
+          `${API_DISCOVER_TV_URL}?api_key=${API_KEY}&watch_region=TR&with_watch_providers=${providerId}&sort_by=popularity.desc&language=tr-TR&page=1`
         ),
       ])
 
       const movies = (moviesRes.data.results || [])
         .filter((m) => m.poster_path)
-        .slice(0, 10)
         .map((m) => ({ ...m, media_type: 'movie' }))
 
       const tv = (tvRes.data.results || [])
         .filter((t) => t.poster_path)
-        .slice(0, 10)
         .map((t) => ({ ...t, media_type: 'tv' }))
 
-      const combined = [...movies, ...tv].sort((a, b) => {
-        const dateA = new Date(a.release_date || a.first_air_date || 0)
-        const dateB = new Date(b.release_date || b.first_air_date || 0)
-        return dateB - dateA
-      })
+      const combined = [...movies, ...tv]
+        .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+        .slice(0, 20)
 
       setContent(combined)
     } catch (error) {
@@ -141,7 +137,7 @@ const WatchProviders = () => {
       {/* Başlık */}
       <div className='swiper-section__header watch-providers__header'>
         <h3>
-          {selectedProvider ? `${selectedProvider.provider_name} — Yeni Çıkanlar` : 'Yayın Platformları'}
+          {selectedProvider ? `${selectedProvider.provider_name} — Şu An Trend` : 'Yayın Platformları'}
         </h3>
       </div>
 
