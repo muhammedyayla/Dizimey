@@ -100,8 +100,16 @@
 }
 
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .movie-card {
-        width: 44vw;
+        width: 140px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .movie-card__media img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
     }
 }

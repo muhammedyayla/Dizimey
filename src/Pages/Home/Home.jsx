@@ -7,6 +7,7 @@ import HeroSwiper from '../../components/heroSwiper/HeroSwiper'
 import WatchProviders from '../../components/watchProviders/WatchProviders'
 import Tabs from '../../components/tabs/Tabs'
 import { useDispatch, useSelector } from 'react-redux'
+import { removeFromFavorite } from '../../redux/slices/favoritesSlice'
 import { getMovieList, getMovieListByGenre, getTopRatedMovies, getTopRatedTv, getTrending } from '../../redux/slices/movieListSlice'
 import { API_IMG } from '../../constants/api'
 import { getAllContinueEntries } from '../../constants/playerProgress'
@@ -22,6 +23,7 @@ const Home = () => {
   const dispatch = useDispatch()
   const { movieList, topRatedMovies, topRatedTv, trending } = useSelector((store) => store.movieList)
   const { genres } = useSelector((store) => store.genre)
+  const { movies: favoriteMovies } = useSelector((store) => store.favorite)
   const [selectedGenre, setSelectedGenre] = useState(null)
   const [isFetching, setIsFetching] = useState(false)
   const [topRatedTab, setTopRatedTab] = useState('movies')
@@ -78,6 +80,12 @@ const Home = () => {
     event.stopPropagation()
     localStorage.removeItem(entryKey)
     setContinueEntries((prev) => prev.filter((item) => item.key !== entryKey))
+  }
+
+  const handleRemoveFavorite = (event, movie) => {
+    event.preventDefault()
+    event.stopPropagation()
+    dispatch(removeFromFavorite(movie))
   }
 
   const handleContinueClick = (entry) => {
@@ -146,6 +154,42 @@ const Home = () => {
         </SwiperSection>
       )}
 
+
+      {favoriteMovies && favoriteMovies.length > 0 && (
+        <SwiperSection title="Watchlist" slidesPerView="auto" spaceBetween={20}>
+          {favoriteMovies.map((movie) => {
+            const posterUrl = movie.poster_path ? `${API_IMG}/${movie.poster_path}` : ''
+
+            return (
+              <div
+                key={movie.id}
+                className='continue-card'
+                onClick={() => handlePlay(movie)}
+              >
+                <div
+                  className='continue-card__media'
+                  style={{ backgroundImage: posterUrl ? `url(${posterUrl})` : undefined }}
+                >
+                  {!posterUrl && (
+                    <div className="continue-card__placeholder">
+                      <span>{(movie.title || movie.name || '?').charAt(0)}</span>
+                    </div>
+                  )}
+                  <button
+                    type='button'
+                    className='continue-card__remove'
+                    aria-label='Listeden çıkar'
+                    onClick={(event) => handleRemoveFavorite(event, movie)}
+                  >
+                    ×
+                  </button>
+                </div>
+                <p title={movie.title || movie.name}>{movie.title || movie.name}</p>
+              </div>
+            )
+          })}
+        </SwiperSection>
+      )}
 
       <SwiperSection titleBig="TOP 10" titleSmall="CONTENT TODAY" slidesPerView="auto" spaceBetween={16}>
         {topTen.map((movie, index) => (

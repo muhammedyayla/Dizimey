@@ -281,10 +281,23 @@
 }
 
 @media (max-width: 768px) {
+    .continue-card {
+        width: 140px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .continue-card__media {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
     .top-rank-card__poster {
         width: 120px;
         transform: translateX(-24px);
     }
+
 
     .top-rated-section__header {
         flex-direction: column;

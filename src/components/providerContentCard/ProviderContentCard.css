@@ -97,8 +97,16 @@
     color: var(--color-muted);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .provider-content-card {
-        width: 42vw;
+        width: 140px;
+        flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .provider-content-card img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
     }
 }

@@ -4,4 +4,11 @@
     color: var(--color-text);
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
+
+@media (max-width: 768px) {
+    .app {
+        padding-bottom: 64px;
+    }
+}

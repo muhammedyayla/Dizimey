@@ -15,11 +15,19 @@ import { HOME, MY_LIST, MOVIE_DETAIL, TV_DETAIL, SEARCH } from './constants/path
 import { useSelector, useDispatch } from 'react-redux'
 import PlayerModal from './components/player/PlayerModal'
 import { closePlayer } from './redux/slices/playerSlice'
+import { closeSearch, closeAuth, closeMenu } from './redux/slices/uiSlice'
+import SearchModal from './components/searchModal/SearchModal'
+import AuthModal from './components/authModal/AuthModal'
+import MobileFooter from './components/mobileFooter/MobileFooter'
+import MobileDrawer from './components/mobileDrawer/MobileDrawer'
+
 
 function App() {
   const { pathname } = useLocation()
   const dispatch = useDispatch()
   const player = useSelector((state) => state.player)
+  const { isSearchOpen, isAuthOpen } = useSelector((state) => state.ui)
+
 
   useEffect(() => {
     window.scrollTo(0, 0)
@@ -36,6 +44,18 @@ function App() {
         <Route path={SEARCH} element={<Search />} />
       </Routes>
       <Footer />
+      <MobileFooter />
+      <MobileDrawer />
+
+      <SearchModal 
+        open={isSearchOpen} 
+        onClose={() => dispatch(closeSearch())} 
+      />
+
+      <AuthModal 
+        open={isAuthOpen} 
+        onClose={() => dispatch(closeAuth())}
+      />
 
       <PlayerModal
         open={player.open}
@@ -48,6 +68,7 @@ function App() {
         posterPath={player.posterPath}
       />
     </div>
+
   )
 }
 

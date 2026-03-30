@@ -143,16 +143,48 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
     .player-modal {
-        padding: 16px;
+        padding: 0;
     }
 
     .player-modal__body {
-        padding: 16px;
+        position: fixed;
+        inset: 0;
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        border-radius: 0;
+        padding: 0;
+        gap: 0;
     }
 
-    .player-modal__controls {
-        flex-direction: column;
+    .player-modal__header {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+        pointer-events: none;
     }
-}
+
+    .player-modal__header > div {
+        display: none;
+    }
+
+    .player-modal__close {
+        pointer-events: auto;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+    }
+
+    .player-wrapper {
+        border-radius: 0;
+        height: 100%;
+        width: 100%;
+    }
+
+    .player-modal__controls,
+    .player-modal__event {
+        display: none;
+    }
+}

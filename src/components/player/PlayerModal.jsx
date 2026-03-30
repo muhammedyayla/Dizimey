@@ -139,10 +139,19 @@ const PlayerModal = ({
   const handleFullscreen = () => {
     const el = playerWrapperRef.current
     if (!el || playerSource === 'notfound') return
+    
+    // Mobilde tam ekran isteği
+    const isMobile = window.innerWidth <= 768
+    
     if (el.requestFullscreen) el.requestFullscreen()
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
     else if (el.mozRequestFullScreen) el.mozRequestFullScreen()
     else if (el.msRequestFullscreen) el.msRequestFullscreen()
+    else if (isMobile) {
+      // Fullscreen API yoksa (iOS Safari vb.) CSS fallback zaten class ile hallolacak
+      console.log('Fullscreen API not supported, using CSS fallback')
+    }
+
   }
 
   // Modal açıldığında player'ı tam ekrana al
@@ -406,8 +415,11 @@ const PlayerModal = ({
                 allow='autoplay; fullscreen'
                 frameBorder='0'
                 allowFullScreen
+                playsInline
+                webkit-playsinline="true"
                 sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-presentation"
               />
+
             </>
           )}
         </div>

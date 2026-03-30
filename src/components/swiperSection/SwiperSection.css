@@ -116,9 +116,28 @@
 }
 
 @media (max-width: 768px) {
+    .swiper-section {
+        padding: 0 16px;
+        margin-bottom: 32px;
+    }
+
+    .swiper-section__header h3 {
+        font-size: 1.15rem;
+    }
+
     .swiper-section__nav-btn {
-        width: 36px;
-        height: 36px;
-        font-size: 1.3rem;
+        width: 32px;
+        height: 32px;
+        font-size: 1.2rem;
+    }
+
+    .swiper-section__slide {
+        width: 140px !important;
+        flex-shrink: 0;
+    }
+
+    .swiper-section__swiper {
+        overflow: hidden;
     }
 }
+

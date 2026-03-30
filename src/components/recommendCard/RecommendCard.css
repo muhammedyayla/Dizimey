@@ -76,6 +76,8 @@
 
 @media (max-width: 768px) {
     .recommend-card {
-        width: 45vw;
+        width: 140px;
+        flex-shrink: 0;
+        overflow: hidden;
     }
 }

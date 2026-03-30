@@ -1,28 +1,27 @@
 import React, { useState, useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { openSearch, openAuth } from '../../redux/slices/uiSlice'
+
 import './navbar.css'
 import { HOME, MY_LIST } from '../../constants/path'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import { MdSearch } from 'react-icons/md'
-import AuthModal from '../authModal/AuthModal'
 import UserMenu from '../userMenu/UserMenu'
 import axios from 'axios'
-import SearchModal from '../searchModal/SearchModal'
+// Modals moved to App.jsx
 
-const navLinks = [
-  { label: 'Ana Sayfa', to: HOME },
-  { label: 'İzleme Listem', to: MY_LIST, hasBadge: true },
-]
+
+
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
 
 const Navbar = () => {
   const { movies } = useSelector((store) => store.favorite)
-  const [isSearchModalOpen, setIsSearchModalOpen] = useState(false)
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const dispatch = useDispatch()
   const [user, setUser] = useState(null)
   const [checkingAuth, setCheckingAuth] = useState(true)
   const navigate = useNavigate()
+
 
   // Check if user is logged in and fetch user info
   useEffect(() => {
@@ -74,29 +73,17 @@ const Navbar = () => {
         </div>
         <Link to={HOME} className='top-nav__title'>Dizimey</Link>
       </div>
-      <nav className='top-nav__links'>
-        {navLinks.map((item) => (
-          <Link
-            key={item.label}
-            to={item.to}
-            className={`top-nav__link ${item.disabled ? 'is-disabled' : ''}`}
-          >
-            <span>{item.label}</span>
-            {item.hasBadge && movies.length > 0 && (
-              <span className='top-nav__badge'>{movies.length}</span>
-            )}
-          </Link>
-        ))}
-      </nav>
+
       <div className='top-nav__actions'>
         {/* Search Modal Trigger */}
-        <button 
-          className='top-nav__search-btn' 
-          onClick={() => setIsSearchModalOpen(true)}
+        <button
+          className='top-nav__search-btn'
+          onClick={() => dispatch(openSearch())}
           aria-label='Search'
         >
           <MdSearch />
         </button>
+
 
         {user ? (
           <UserMenu user={user} onLogout={handleLogout} />
@@ -104,21 +91,15 @@ const Navbar = () => {
           <button
             className='top-nav__avatar'
             type='button'
-            onClick={() => setIsAuthModalOpen(true)}
+            onClick={() => dispatch(openAuth())}
             aria-label='Kullanıcı profili'
           />
+
         )}
       </div>
 
-      <SearchModal 
-        open={isSearchModalOpen} 
-        onClose={() => setIsSearchModalOpen(false)} 
-      />
+      {/* Modals moved to App.jsx */}
 
-      <AuthModal 
-        open={isAuthModalOpen} 
-        onClose={() => setIsAuthModalOpen(false)}
-      />
     </header>
   )
 }

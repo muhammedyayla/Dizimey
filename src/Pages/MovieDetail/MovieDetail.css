@@ -241,9 +241,86 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+    .detail-page {
+        padding: 16px 16px 64px;
+        gap: 24px;
+    }
+
     .detail-hero {
+        min-height: 480px;
         border-radius: 20px;
+    }
+
+    .detail-hero__content {
+        padding: 24px 16px;
+        max-width: 100%;
+        justify-content: flex-end;
+        height: 100%;
+    }
+
+    .detail-hero h1 {
+        font-size: 2rem;
+    }
+
+    .detail-hero__description {
+        font-size: 0.9rem;
+        -webkit-line-clamp: 4;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .detail-content {
+        padding: 24px 16px;
+        border-radius: 20px;
+        gap: 20px;
+    }
+
+    .tabs {
+        gap: 8px;
+    }
+
+    .tabs__item {
+        padding: 8px 14px;
+        font-size: 0.85rem;
+    }
+
+    .detail-body {
+        gap: 24px;
+    }
+
+    .detail-body__main h3 {
+        font-size: 1.25rem;
+    }
+
+    .cast-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 12px;
+    }
+
+    .cast-card {
+        padding: 12px;
+    }
+
+    .cast-card__avatar {
+        width: 80px;
+        height: 80px;
+    }
+
+    .detail-recommendations {
+        padding: 0 16px 48px;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .recommendations-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 

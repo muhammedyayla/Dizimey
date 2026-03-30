@@ -6,8 +6,9 @@ import CardTrailerOverlay from '../common/CardTrailerOverlay'
 import { FaStar } from 'react-icons/fa6'
 import './RecommendCard.css'
 
-const getBackdropUrl = (path) =>
-  path ? `https://wsrv.nl/?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Fw780${path}&output=webp&q=65&n=-1` : null
+const getImageUrl = (path) =>
+  path ? `https://wsrv.nl/?url=https%3A%2F%2Fimage.tmdb.org%2Ft%2Fp%2Fw342${path}&output=webp&q=50&n=-1` : null
+
 
 const RecommendCard = ({ item }) => {
   const { id, media_type, poster_path, backdrop_path, vote_average } = item
@@ -16,10 +17,11 @@ const RecommendCard = ({ item }) => {
   const to = media_type === 'tv' ? `/tv/${id}` : `/movie/${id}`
   const mediaTypeLabel = media_type === 'tv' ? 'SERIES' : 'MOVIE'
   
-  const imageSrc = getBackdropUrl(backdrop_path) || getBackdropUrl(poster_path) || ''
+  const imageSrc = getImageUrl(poster_path) || getImageUrl(backdrop_path) || ''
 
-  const { isHovered, showVideo, trailerUrl, titleBackdrop, handleMouseEnter, handleMouseLeave } = 
-    useTrailerHover(id, media_type, backdrop_path)
+  const { isHovered, showVideo, trailerUrl, handleMouseEnter, handleMouseLeave } = 
+    useTrailerHover(id, media_type, poster_path)
+
   
   const [isTitleVisible, setIsTitleVisible] = useState(false)
 
@@ -45,7 +47,7 @@ const RecommendCard = ({ item }) => {
       <div className='recommend-card__media-wrapper'>
         <div
           className='recommend-card__media'
-          style={{ backgroundImage: `url(${titleBackdrop || imageSrc})` }}
+          style={{ backgroundImage: `url(${imageSrc})` }}
         >
           {/* Video Trailer Overlay */}
           <CardTrailerOverlay show={showVideo} trailerUrl={trailerUrl} title={title} />

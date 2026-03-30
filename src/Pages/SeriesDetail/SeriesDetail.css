@@ -612,37 +612,86 @@
     padding: 24px;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
+    .series-detail-page {
+        padding: 16px 16px 64px;
+        gap: 24px;
+    }
+
     .series-detail-hero {
+        min-height: 480px;
         border-radius: 20px;
     }
 
-    .episode-card {
-        flex-direction: column;
-        align-items: stretch;
+    .series-detail-hero__content {
+        padding: 24px 16px;
+        max-width: 100%;
+        justify-content: flex-end;
+        height: 100%;
     }
 
-    .episode-card__thumbnail {
-        width: 100%;
+    .series-detail-hero h1 {
+        font-size: 2rem;
+    }
+
+    .series-detail-content {
+        padding: 0 16px;
+        gap: 32px;
+    }
+
+    .section-title {
+        font-size: 1.4rem;
+        margin-bottom: 16px;
+    }
+
+    .section-title__bar {
+        height: 24px;
+    }
+
+    .episodes-list {
+        gap: 12px;
+    }
+
+    .episode-card {
+        padding: 8px;
+        gap: 12px;
+    }
+
+    .episode-card__title {
+        font-size: 1rem;
+    }
+
+    .episode-card__description {
+        font-size: 0.8rem;
+        -webkit-line-clamp: 2;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
 
     .cast-grid {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .recommendations-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
     }
 
     .episode-picker__panel {
-        top: 12px;
-        right: 12px;
-        bottom: 12px;
-        width: calc(100vw - 24px);
-    }
-
-    .episode-picker__item {
-        flex-direction: column;
-    }
-
-    .episode-picker__thumb {
-        width: 100%;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        border-radius: 0;
     }
 }
+
+@media (max-width: 480px) {
+    .recommendations-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 
