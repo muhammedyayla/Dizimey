@@ -39,3 +39,7 @@ export const getAllContinueEntries = () => {
   }
   return entries.sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
 }
+export const clearContinueEntry = (params) => {
+  const key = buildContinueKey(params)
+  localStorage.removeItem(key)
+}

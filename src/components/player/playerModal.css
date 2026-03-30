@@ -116,6 +116,28 @@
     background: transparent;
 }
 
+.player-not-found {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: rgba(255, 255, 255, 0.5);
+    gap: 12px;
+    text-align: center;
+    padding: 24px;
+}
+
+.player-not-found h3 {
+    margin: 0;
+    color: #fff;
+}
+
+.player-not-found p {
+    margin: 0;
+    max-width: 300px;
+}
+
 .player-modal__event {
     font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
