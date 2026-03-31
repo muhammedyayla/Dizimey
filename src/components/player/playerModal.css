@@ -146,17 +146,21 @@
 @media (max-width: 768px) {
     .player-modal {
         padding: 0;
+        align-items: stretch;
+        justify-content: stretch;
     }
 
     .player-modal__body {
         position: fixed;
         inset: 0;
         width: 100vw;
-        height: 100vh;
+        height: 100dvh; /* dvh: address bar dahil gerçek yükseklik */
         max-width: none;
+        max-height: none;
         border-radius: 0;
         padding: 0;
         gap: 0;
+        overflow: hidden;
     }
 
     .player-modal__header {
@@ -179,12 +183,15 @@
 
     .player-wrapper {
         border-radius: 0;
-        height: 100%;
+        flex: 1 1 auto; /* flex container içinde kalan tüm alanı kapla */
         width: 100%;
+        height: 100%; /* fallback */
+        min-height: 0; /* flex shrink için gerekli */
+        aspect-ratio: unset; /* mobilde aspect-ratio'yu kaldır */
     }
 
     .player-modal__controls,
     .player-modal__event {
         display: none;
     }
-}
+}
