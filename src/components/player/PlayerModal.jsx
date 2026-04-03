@@ -1,6 +1,7 @@
 import { getContinueEntry, buildContinueKey, clearContinueEntry } from '../../constants/playerProgress'
 import { MdMovieFilter } from 'react-icons/md'
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import './playerModal.css'
 
 const VIDKING_TIMEOUT = 7000
 const VIDCORE_TIMEOUT = 7000
@@ -304,51 +305,6 @@ const PlayerModal = ({
     [mediaType, tmdbId, season, episode, startTime, resumeTime, playerSource]
   )
 
-  const [isPlaying, setIsPlaying] = useState(true)
-  const clickTimerRef = useRef(null)
-
-  const togglePlay = () => {
-    const iframe = playerWrapperRef.current?.querySelector('iframe')
-    if (!iframe) return
-
-    const newPlaying = !isPlaying
-    setIsPlaying(newPlaying)
-
-    // Yaygın player komutlarını gönderelim
-    const commands = [
-      JSON.stringify({ event: 'command', func: newPlaying ? 'playVideo' : 'pauseVideo' }),
-      JSON.stringify({ method: newPlaying ? 'play' : 'pause' }),
-      JSON.stringify({ type: 'PLAYER_COMMAND', data: newPlaying ? 'play' : 'pause' })
-    ]
-
-    commands.forEach(cmd => {
-      try {
-        iframe.contentWindow.postMessage(cmd, '*')
-      } catch (e) {
-        // sessizce geç
-      }
-    })
-  }
-
-  const clickCountRef = useRef(0)
-  const timerRef = useRef(null)
-
-  const handlePlayerClick = (e) => {
-    e.preventDefault()
-    clickCountRef.current += 1
-
-    if (clickCountRef.current === 1) {
-      timerRef.current = setTimeout(() => {
-        togglePlay()
-        clickCountRef.current = 0
-      }, 250)
-    } else if (clickCountRef.current === 2) {
-      clearTimeout(timerRef.current)
-      closePlayer()
-      clickCountRef.current = 0
-    }
-  }
-
 
   if (!open) return null
 
@@ -402,10 +358,6 @@ const PlayerModal = ({
             </div>
           ) : (
             <>
-              <div
-                className='player-click-layer'
-                onClick={handlePlayerClick}
-              />
               <iframe
                 key={playerSource} // Forcing iframe re-render on source change
                 title='Media Player'
@@ -417,7 +369,7 @@ const PlayerModal = ({
                 allowFullScreen
                 playsInline
                 webkit-playsinline="true"
-                sandbox="allow-forms allow-scripts allow-pointer-lock allow-same-origin allow-presentation"
+                sandbox="allow-scripts allow-same-origin allow-presentation"
               />
 
             </>
