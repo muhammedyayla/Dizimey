@@ -113,10 +113,10 @@ const PlayerModal = ({
   const handleFullscreen = () => {
     const el = playerWrapperRef.current
     if (!el || playerNotFound) return
-    
+
     // Mobilde tam ekran isteği
     const isMobile = window.innerWidth <= 768
-    
+
     if (el.requestFullscreen) el.requestFullscreen()
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
     else if (el.mozRequestFullScreen) el.mozRequestFullScreen()
@@ -131,12 +131,23 @@ const PlayerModal = ({
   // Modal açıldığında player'ı tam ekrana al
   useEffect(() => {
     if (!open) return
-    // Kısa gecikme: modal DOM'a yerleştikten sonra fullscreen isteği gönder
+    const isMobile = window.innerWidth <= 768
+    if (isMobile) return // mobilde fullscreen açma
     const timer = setTimeout(() => {
       handleFullscreen()
     }, 300)
     return () => clearTimeout(timer)
   }, [open, tmdbId])
+
+  // Body scroll kilidi
+  useEffect(() => {
+    if (open) {
+      document.body.classList.add('player-open')
+    } else {
+      document.body.classList.remove('player-open')
+    }
+    return () => document.body.classList.remove('player-open')
+  }, [open])
 
   // Modal açıkken site genelinde (iframe hariç) sağ tık engelle
   // (Çapraz domain (cross-origin) iframe içine tarayıcı güvenliği gereği müdahale edilemez 

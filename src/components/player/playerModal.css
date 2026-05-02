@@ -141,11 +141,19 @@
     color: rgba(255, 255, 255, 0.6);
 }
 
+/* ── Mobil: arka sayfa scroll kilidi ── */
+body.player-open {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     .player-modal {
         position: fixed;
         inset: 0;
         padding: 0;
+        align-items: flex-start;
     }
 
     .player-modal__backdrop {
@@ -156,23 +164,111 @@
         position: fixed;
         inset: 0;
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         max-width: none;
         max-height: none;
         padding: 0;
         margin: 0;
         border-radius: 0;
         gap: 0;
+        overflow-y: auto;
+        background: #0f0f14;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Header: başlık + kapat butonu üstte sabit */
+    .player-modal__header {
+        position: relative;
+        top: unset;
+        right: unset;
+        z-index: 10;
+        pointer-events: auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 16px 10px;
+        background: #0f0f14;
+        flex-shrink: 0;
+    }
+
+    .player-modal__header>div {
+        display: block;
+    }
+
+    .player-modal__header h4 {
+        font-size: 0.95rem;
+        margin: 2px 0 0;
+        white-space: nowrap;
         overflow: hidden;
-        background: black;
+        text-overflow: ellipsis;
+        max-width: 70vw;
+    }
+
+    .player-modal__close {
+        pointer-events: auto;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: none;
+        flex-shrink: 0;
+    }
+
+    /* Video: 16/9 oranında, tam genişlik */
+    .player-wrapper {
+        position: relative;
+        inset: unset;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        border-radius: 0;
+        flex-shrink: 0;
+    }
+
+    /* Sezon/bölüm kontrolleri video altında görünsün */
+    .player-modal__controls {
+        display: flex;
+        gap: 16px;
+        padding: 16px 16px 8px;
+        flex-shrink: 0;
+    }
+
+    .player-modal__controls input {
+        width: 72px;
+    }
+
+    .player-modal__event {
+        display: none;
+    }
+}
+
+/* ── Mobil Portrait: video ekranı kaplar, altında kontroller ── */
+@media (max-width: 768px) and (orientation: portrait) {
+    .player-modal__body {
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .player-wrapper {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        height: auto;
+        max-height: unset;
+    }
+}
+
+/* ── Mobil Landscape: tam ekran video, header ve kontroller gizli ── */
+@media (max-width: 768px) and (orientation: landscape) {
+    .player-modal__body {
+        overflow: hidden;
     }
 
     .player-modal__header {
         position: absolute;
-        top: 16px;
-        right: 16px;
-        z-index: 100;
-        pointer-events: none;
+        top: 8px;
+        right: 8px;
+        padding: 0;
+        background: transparent;
+        z-index: 20;
     }
 
     .player-modal__header>div {
@@ -180,8 +276,7 @@
     }
 
     .player-modal__close {
-        pointer-events: auto;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.55);
         backdrop-filter: blur(4px);
     }
 
@@ -190,11 +285,10 @@
         inset: 0;
         width: 100%;
         height: 100%;
-        border-radius: 0;
+        aspect-ratio: unset;
     }
 
-    .player-modal__controls,
-    .player-modal__event {
+    .player-modal__controls {
         display: none;
     }
 }
