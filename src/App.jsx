@@ -47,13 +47,13 @@ function App() {
       <MobileFooter />
       <MobileDrawer />
 
-      <SearchModal 
-        open={isSearchOpen} 
-        onClose={() => dispatch(closeSearch())} 
+      <SearchModal
+        open={isSearchOpen}
+        onClose={() => dispatch(closeSearch())}
       />
 
-      <AuthModal 
-        open={isAuthOpen} 
+      <AuthModal
+        open={isAuthOpen}
         onClose={() => dispatch(closeAuth())}
       />
 

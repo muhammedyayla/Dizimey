@@ -1,40 +1,15 @@
 import { getContinueEntry, buildContinueKey, clearContinueEntry } from '../../constants/playerProgress'
 import { MdMovieFilter } from 'react-icons/md'
-import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import './playerModal.css'
 
-const VIDKING_TIMEOUT = 7000
-const VIDCORE_TIMEOUT = 7000
+
 
 const BRAND_COLOR = 'ea2a33'
 
-const buildPlayerSrc = ({ mediaType, tmdbId, season, episode, startTime, source = 'vidking' }) => {
+const buildPlayerSrc = ({ mediaType, tmdbId, season, episode, startTime }) => {
   if (!tmdbId) return ''
 
-  if (source === 'vidcore') {
-    const params = new URLSearchParams({
-      autoPlay: 'true',
-      theme: BRAND_COLOR,
-      hideServer: 'true'
-    })
-
-    if (mediaType === 'tv') {
-      params.set('nextButton', 'true')
-      params.set('autoNext', 'true')
-    }
-
-    if (Number(startTime) > 0) {
-      params.set('startAt', String(Math.floor(startTime)))
-    }
-
-    const path = mediaType === 'tv'
-      ? `tv/${tmdbId}/${season}/${episode}`
-      : `movie/${tmdbId}`
-
-    return `https://vidcore.net/${path}?${params.toString()}`
-  }
-
-  // Default: Vidking
   const playerBase = import.meta.env.VITE_PLAYER_BASE_URL || 'https://www.vidking.net/embed'
   const params = new URLSearchParams({
     color: BRAND_COLOR,
@@ -72,11 +47,9 @@ const PlayerModal = ({
   const [season, setSeason] = useState(initialSeason || 1)
   const [episode, setEpisode] = useState(initialEpisode || 1)
   const [lastEvent, setLastEvent] = useState(null)
-  const [playerSource, setPlayerSource] = useState('vidking') // vidking | vidcore | notfound
-  const [hasReceivedMessage, setHasReceivedMessage] = useState(false)
+  const [playerNotFound, setPlayerNotFound] = useState(false)
 
   const playerWrapperRef = useRef(null)
-  const timeoutRef = useRef(null)
 
   const continueMeta = useMemo(() => {
     if (!tmdbId) return null
@@ -139,7 +112,7 @@ const PlayerModal = ({
   // Tam ekran fonksiyonu
   const handleFullscreen = () => {
     const el = playerWrapperRef.current
-    if (!el || playerSource === 'notfound') return
+    if (!el || playerNotFound) return
     
     // Mobilde tam ekran isteği
     const isMobile = window.innerWidth <= 768
@@ -214,18 +187,10 @@ const PlayerModal = ({
     if (!open) return undefined
 
     const handleMessage = (event) => {
-      // Vidcore Origin Kontrolü
-      if (playerSource === 'vidcore' && event.origin !== 'https://vidcore.net') return
-
       if (typeof event.data !== 'string' && typeof event.data !== 'object') return
 
       try {
         const payload = typeof event.data === 'string' ? JSON.parse(event.data) : event.data
-
-        // Herhangi bir geçerli mesaj geldiğinde timeout'u iptal et
-        if (payload) {
-          setHasReceivedMessage(true)
-        }
 
         // Vidking Eventleri
         if (payload?.type === 'PLAYER_EVENT') {
@@ -235,20 +200,6 @@ const PlayerModal = ({
             onPlayerEvent(payload.data)
           }
         }
-
-        // Vidcore Eventleri
-        if (playerSource === 'vidcore') {
-          if (payload?.type === 'timeupdate') {
-            const { currentTime, duration } = payload.data || {}
-            // Her 10 saniyede bir kaydet
-            if (currentTime !== undefined && Math.floor(currentTime) % 10 === 0) {
-              persistContinueProgress({ currentTime, duration })
-            }
-          }
-          if (payload?.type === 'ended') {
-            clearContinueProgress()
-          }
-        }
       } catch {
         // yoksay
       }
@@ -256,36 +207,7 @@ const PlayerModal = ({
 
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
-  }, [open, tmdbId, onPlayerEvent, playerSource, continueMeta])
-
-  // Fallback Zinciri
-  useEffect(() => {
-    // Eğer zaten mesaj gelmişse veya içerik bulunamadıysa fallback'i çalıştırma
-    if (!open || hasReceivedMessage || playerSource === 'notfound') return
-
-    const timeoutDuration = playerSource === 'vidking' ? VIDKING_TIMEOUT : VIDCORE_TIMEOUT
-
-    timeoutRef.current = setTimeout(() => {
-      if (!hasReceivedMessage) {
-        if (playerSource === 'vidking') {
-          console.log('Vidking timeout, switching to Vidcore...')
-          setPlayerSource('vidcore')
-        } else if (playerSource === 'vidcore') {
-          console.log('Vidcore timeout, content not found.')
-          setPlayerSource('notfound')
-        }
-      }
-    }, timeoutDuration)
-
-    return () => {
-      if (timeoutRef.current) clearTimeout(timeoutRef.current)
-    }
-  }, [open, playerSource, hasReceivedMessage])
-
-  // Kaynak değişince mesaj durumunu sıfırla
-  useEffect(() => {
-    setHasReceivedMessage(false)
-  }, [playerSource])
+  }, [open, tmdbId, onPlayerEvent, continueMeta])
 
   useEffect(() => {
     if (!open) return
@@ -300,9 +222,8 @@ const PlayerModal = ({
       season,
       episode,
       startTime: startTime || resumeTime,
-      source: playerSource
     }),
-    [mediaType, tmdbId, season, episode, startTime, resumeTime, playerSource]
+    [mediaType, tmdbId, season, episode, startTime, resumeTime]
   )
 
 
@@ -350,29 +271,23 @@ const PlayerModal = ({
           className='player-wrapper'
         >
 
-          {playerSource === 'notfound' ? (
+          {playerNotFound ? (
             <div className="player-not-found">
               <MdMovieFilter size={64} />
               <h3>İçerik Bulunamadı</h3>
               <p>Bu içerik şu an mevcut değil, yakında eklenecek.</p>
             </div>
           ) : (
-            <>
-              <iframe
-                key={playerSource} // Forcing iframe re-render on source change
-                title='Media Player'
-                src={src}
-                width='100%'
-                height='100%'
-                allow='autoplay; fullscreen'
-                frameBorder='0'
-                allowFullScreen
-                playsInline
-                webkit-playsinline="true"
-                sandbox="allow-scripts allow-same-origin allow-presentation"
-              />
-
-            </>
+            <iframe
+              title='Media Player'
+              src={src}
+              width='100%'
+              height='100%'
+              allow='autoplay; fullscreen; encrypted-media; picture-in-picture'
+              frameBorder='0'
+              allowFullScreen
+              referrerPolicy='no-referrer-when-downgrade'
+            />
           )}
         </div>
 
