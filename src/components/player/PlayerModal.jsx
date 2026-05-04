@@ -257,38 +257,9 @@ const PlayerModal = ({
     <div className='player-modal'>
       <div className='player-modal__backdrop' onClick={closePlayer} />
       <div className='player-modal__body'>
-        <div className='player-modal__header'>
-          <div>
-            <p className='player-modal__eyebrow'>Player</p>
-            <h4>{title}</h4>
-          </div>
-          <button type='button' className='player-modal__close' onClick={closePlayer} aria-label='Kapat'>
-            ×
-          </button>
-        </div>
-
-        {mediaType === 'tv' && (
-          <div className='player-modal__controls'>
-            <label>
-              <span>Sezon</span>
-              <input
-                type='number'
-                min={1}
-                value={season}
-                onChange={(e) => setSeason(Math.max(1, Number(e.target.value)))}
-              />
-            </label>
-            <label>
-              <span>Bölüm</span>
-              <input
-                type='number'
-                min={1}
-                value={episode}
-                onChange={(e) => setEpisode(Math.max(1, Number(e.target.value)))}
-              />
-            </label>
-          </div>
-        )}
+        <button type='button' className='player-modal__close-fab' onClick={closePlayer} aria-label='Kapat'>
+          ×
+        </button>
 
         <div
           ref={playerWrapperRef}

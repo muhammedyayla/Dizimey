@@ -1,354 +1,475 @@
 .player-modal {
+
     position: fixed;
+
     inset: 0;
+
     z-index: 2000;
+
     display: flex;
+
     align-items: center;
+
     justify-content: center;
+
     padding: 24px;
+
 }
+
+
 
 .player-modal__backdrop {
+
     position: absolute;
+
     inset: 0;
+
     background: rgba(0, 0, 0, 0.7);
+
     backdrop-filter: blur(4px);
+
 }
+
+
 
 .player-modal__body {
+
     position: relative;
+
     width: min(960px, 90vw);
+
     background-color: #0f0f14;
+
     border-radius: 24px;
+
     padding: 24px;
+
     display: flex;
+
     flex-direction: column;
+
     gap: 16px;
+
     box-shadow: 0 20px 80px rgba(0, 0, 0, 0.45);
+
     z-index: 1;
+
 }
 
-.player-modal__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-}
 
-.player-modal__eyebrow {
-    margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.2em;
-    font-size: 0.7rem;
-    color: rgba(255, 255, 255, 0.4);
-}
 
-.player-modal__header h4 {
-    margin: 4px 0 0;
-}
+/* Başlık / sezon satırı yok; yalnızca kapat (backdrop da masaüstünde kapatır) */
 
-.player-modal__close {
-    width: 40px;
-    height: 40px;
+.player-modal__close-fab {
+
+    position: absolute;
+
+    top: max(12px, env(safe-area-inset-top, 0px));
+
+    right: max(12px, env(safe-area-inset-right, 0px));
+
+    z-index: 30;
+
+    width: 44px;
+
+    height: 44px;
+
     border-radius: 12px;
+
     border: none;
-    background-color: rgba(255, 255, 255, 0.08);
+
+    background-color: rgba(0, 0, 0, 0.55);
+
+    backdrop-filter: blur(6px);
+
     color: #fff;
+
     font-size: 1.5rem;
+
+    line-height: 1;
+
     cursor: pointer;
-}
 
-.player-modal__controls {
     display: flex;
-    gap: 16px;
+
+    align-items: center;
+
+    justify-content: center;
+
 }
 
-.player-modal__controls label {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.7);
+
+
+.player-modal__close-fab:hover {
+
+    background-color: rgba(0, 0, 0, 0.7);
+
 }
 
-.player-modal__controls input {
-    background-color: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 10px;
-    padding: 8px 12px;
-    color: #fff;
-}
+
 
 .player-wrapper {
+
     width: 100%;
+
     aspect-ratio: 16 / 9;
+
     border-radius: 16px;
+
     overflow: hidden;
+
     background-color: #000;
+
     position: relative;
+
 }
+
+
 
 .player-wrapper iframe {
+
     position: absolute;
+
     inset: 0;
+
     width: 100%;
+
     height: 100%;
+
 }
+
+
 
 /* Tam ekran modunda boyutu tam yap */
+
 .player-wrapper:fullscreen,
+
 .player-wrapper:-webkit-full-screen,
+
 .player-wrapper:-moz-full-screen {
+
     width: 100vw;
+
     height: 100vh;
+
     border-radius: 0;
+
     aspect-ratio: unset;
+
 }
 
+
+
 .player-wrapper:fullscreen iframe,
+
 .player-wrapper:-webkit-full-screen iframe,
+
 .player-wrapper:-moz-full-screen iframe {
+
     width: 100%;
+
     height: 100%;
+
 }
 
 
 
 .player-not-found {
+
     display: flex;
+
     flex-direction: column;
+
     align-items: center;
+
     justify-content: center;
+
     height: 100%;
+
     color: rgba(255, 255, 255, 0.5);
+
     gap: 12px;
+
     text-align: center;
+
     padding: 24px;
+
 }
+
+
 
 .player-not-found h3 {
+
     margin: 0;
+
     color: #fff;
+
 }
+
+
 
 .player-not-found p {
+
     margin: 0;
+
     max-width: 300px;
+
 }
+
+
 
 .player-modal__event {
+
     font-size: 0.85rem;
+
     color: rgba(255, 255, 255, 0.6);
+
 }
+
+
 
 /* ── Player açıkken arka plan kayması (JS ile position:fixed eşlik eder) ── */
+
 html.player-open,
+
 body.player-open {
+
     overflow: hidden !important;
+
     overscroll-behavior: none;
+
     width: 100%;
+
     height: 100%;
+
 }
+
+
 
 @media (max-width: 768px) {
+
     .player-modal {
+
         padding: 0;
+
         margin: 0;
+
         align-items: stretch;
+
         justify-content: flex-start;
+
         flex-direction: column;
+
         width: 100%;
+
         max-width: 100%;
+
         height: 100dvh;
+
         min-height: 100vh;
+
         min-height: 100dvh;
+
         max-height: 100dvh;
+
         box-sizing: border-box;
+
         overflow: hidden;
+
         overscroll-behavior: none;
-        /* Çentik / home bar — kenar boşluğu yerine güvenli iç alan */
+
         padding-top: env(safe-area-inset-top, 0px);
+
         padding-bottom: env(safe-area-inset-bottom, 0px);
+
         padding-left: env(safe-area-inset-left, 0px);
+
         padding-right: env(safe-area-inset-right, 0px);
+
     }
+
+
 
     .player-modal__backdrop {
+
         display: none;
+
     }
+
+
 
     .player-modal__body {
+
         position: relative;
+
         flex: 1 1 auto;
+
         min-height: 0;
+
         width: 100%;
+
         max-width: 100%;
+
         height: 100%;
+
         max-height: none;
+
         padding: 0;
+
         margin: 0;
+
         border-radius: 0;
+
         gap: 0;
+
         overflow: hidden;
+
         background: #0f0f14;
+
         display: flex;
+
         flex-direction: column;
+
     }
 
-    /* Header: başlık + kapat (order: 0) */
-    .player-modal__header {
-        order: 0;
-        position: relative;
-        top: unset;
-        right: unset;
-        z-index: 10;
-        pointer-events: auto;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 12px 8px;
-        background: #0f0f14;
-        flex-shrink: 0;
+
+
+    .player-modal__close-fab {
+
+        top: max(10px, calc(env(safe-area-inset-top, 0px) + 6px));
+
+        right: max(10px, calc(env(safe-area-inset-right, 0px) + 6px));
+
     }
 
-    .player-modal__header>div {
-        display: block;
-    }
 
-    .player-modal__header h4 {
-        font-size: 0.95rem;
-        margin: 2px 0 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: 70vw;
-    }
 
-    .player-modal__close {
-        pointer-events: auto;
-        background: rgba(255, 255, 255, 0.08);
-        backdrop-filter: none;
-        flex-shrink: 0;
-    }
-
-    /* Video: iframe absolute olduğu için min-height ile taban; flex ile kalan yükseklik dolar */
     .player-wrapper {
-        order: 1;
+
         position: relative;
-        inset: unset;
+
         width: 100%;
+
         flex: 1 1 0;
+
         min-height: calc(100vw * 9 / 16);
+
         height: auto;
+
         aspect-ratio: unset;
+
         border-radius: 0;
+
     }
 
-    /* Sezon/bölüm — video altında (order: 2) */
-    .player-modal__controls {
-        order: 2;
-        display: flex;
-        gap: 16px;
-        padding: 12px 16px max(12px, env(safe-area-inset-bottom, 0px));
-        flex-shrink: 0;
-    }
 
-    .player-modal__controls input {
-        width: 72px;
-    }
 
     .player-modal__event {
+
         display: none;
+
     }
+
 }
 
-/* ── Mobil Portrait: gövde içinde kaydırma yok, video alanı genişlesin ── */
+
+
 @media (max-width: 768px) and (orientation: portrait) {
+
     .player-modal__body {
+
         overflow: hidden;
+
     }
+
+
 
     .player-wrapper {
+
         flex: 1 1 0;
+
         min-height: calc(100vw * 9 / 16);
+
         aspect-ratio: unset;
+
     }
+
 }
 
-/* ── Mobil Landscape: taşma yok, kenar boşluğu yok; embed kontrolleri için esnek yükseklik ── */
+
+
 @media (max-width: 768px) and (orientation: landscape) {
-    /* 100vw tabanlı min-height yatayda taşır; padding yok; yükseklik görünür viewport */
+
     .player-modal {
+
         padding: 0;
+
         height: 100vh;
+
         min-height: 100vh;
+
         max-height: 100vh;
+
     }
+
+
 
     @supports (height: 100svh) {
+
         .player-modal {
+
             height: 100svh;
+
             min-height: 100svh;
+
             max-height: 100svh;
+
         }
+
     }
+
+
 
     .player-modal__body {
+
         overflow: hidden;
+
         display: flex;
+
         flex-direction: column;
+
         min-height: 0;
+
         height: 100%;
+
         max-height: 100%;
+
     }
 
-    .player-modal__header {
-        order: 0;
-        position: relative;
-        top: unset;
-        right: unset;
-        z-index: 10;
-        flex-shrink: 0;
-        padding: 6px 10px 4px;
-        background: #0f0f14;
+
+
+    .player-modal__close-fab {
+
+        top: max(8px, env(safe-area-inset-top, 0px));
+
+        right: max(8px, env(safe-area-inset-right, 0px));
+
     }
 
-    .player-modal__header>div {
-        display: block;
-        min-width: 0;
-    }
 
-    .player-modal__header h4 {
-        max-width: 55vw;
-        font-size: 0.8rem;
-    }
 
-    .player-modal__close {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(4px);
-    }
-
-    /* Yatayda 100vw*9/16 taşmayı tetikler — yalnızca flex ile doldur */
     .player-wrapper {
-        order: 1;
-        position: relative;
-        inset: unset;
+
         flex: 1 1 0;
+
         min-height: 0;
+
         width: 100%;
+
         height: auto;
+
         aspect-ratio: unset;
+
     }
 
-    .player-modal__controls {
-        order: 2;
-        display: flex;
-        flex-shrink: 0;
-        padding: 6px 12px 8px;
-        gap: 12px;
-    }
-
-    .player-modal__controls input {
-        width: 64px;
-    }
 }
