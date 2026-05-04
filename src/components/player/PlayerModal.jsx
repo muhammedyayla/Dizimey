@@ -1,6 +1,6 @@
-import { getContinueEntry, buildContinueKey, clearContinueEntry } from '../../constants/playerProgress'
+import { getContinueEntry, buildContinueKey } from '../../constants/playerProgress'
 import { MdMovieFilter } from 'react-icons/md'
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import './playerModal.css'
 
 
@@ -71,7 +71,7 @@ const PlayerModal = ({
     return Number(entry.time) || 0
   }, [continueMeta])
 
-  const persistContinueProgress = (manualEvent = null) => {
+  const persistContinueProgress = useCallback((manualEvent = null) => {
     if (!continueMeta) return
     const eventToUse = manualEvent || lastEvent
     if (!eventToUse) return
@@ -97,56 +97,78 @@ const PlayerModal = ({
 
     const key = buildContinueKey(continueMeta)
     localStorage.setItem(key, JSON.stringify(payload))
-  }
+  }, [continueMeta, lastEvent])
 
-  const clearContinueProgress = () => {
-    if (!continueMeta) return
-    clearContinueEntry(continueMeta)
-  }
-
-  const closePlayer = () => {
+  const closePlayer = useCallback(() => {
     persistContinueProgress()
     onClose()
-  }
+  }, [persistContinueProgress, onClose])
 
   // Tam ekran fonksiyonu
-  const handleFullscreen = () => {
+  const handleFullscreen = useCallback(() => {
     const el = playerWrapperRef.current
     if (!el || playerNotFound) return
 
-    // Mobilde tam ekran isteği
     const isMobile = window.innerWidth <= 768
 
     if (el.requestFullscreen) el.requestFullscreen()
     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen()
     else if (el.mozRequestFullScreen) el.mozRequestFullScreen()
     else if (el.msRequestFullscreen) el.msRequestFullscreen()
-    else if (isMobile) {
-      // Fullscreen API yoksa (iOS Safari vb.) CSS fallback zaten class ile hallolacak
-      console.log('Fullscreen API not supported, using CSS fallback')
+    else if (isMobile && import.meta.env.DEV) {
+      console.warn('PlayerModal: Fullscreen API not supported')
     }
+  }, [playerNotFound])
 
-  }
-
-  // Modal açıldığında player'ı tam ekrana al
+  // Modal açıldığında mümkünse player sarmalayıcıyı tam ekran yap (Android vb.; iOS çoğu zaman yoksayar)
   useEffect(() => {
     if (!open) return
-    const isMobile = window.innerWidth <= 768
-    if (isMobile) return // mobilde fullscreen açma
     const timer = setTimeout(() => {
       handleFullscreen()
-    }, 300)
+    }, 400)
     return () => clearTimeout(timer)
-  }, [open, tmdbId])
+  }, [open, tmdbId, handleFullscreen])
 
-  // Body scroll kilidi
+  // Arka plan scroll kilidi (özellikle mobil Safari: yalnız overflow yetmez)
   useEffect(() => {
-    if (open) {
-      document.body.classList.add('player-open')
-    } else {
-      document.body.classList.remove('player-open')
+    if (!open) return undefined
+
+    const html = document.documentElement
+    const body = document.body
+    const scrollY = window.scrollY || window.pageYOffset || 0
+
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyLeft: body.style.left,
+      bodyRight: body.style.right,
+      bodyWidth: body.style.width,
     }
-    return () => document.body.classList.remove('player-open')
+
+    html.classList.add('player-open')
+    body.classList.add('player-open')
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollY}px`
+    body.style.left = '0'
+    body.style.right = '0'
+    body.style.width = '100%'
+
+    return () => {
+      html.classList.remove('player-open')
+      body.classList.remove('player-open')
+      html.style.overflow = prev.htmlOverflow
+      body.style.overflow = prev.bodyOverflow
+      body.style.position = prev.bodyPosition
+      body.style.top = prev.bodyTop
+      body.style.left = prev.bodyLeft
+      body.style.right = prev.bodyRight
+      body.style.width = prev.bodyWidth
+      window.scrollTo(0, scrollY)
+    }
   }, [open])
 
   // Modal açıkken site genelinde (iframe hariç) sağ tık engelle
@@ -167,32 +189,19 @@ const PlayerModal = ({
     }
   }, [open])
 
-  // ESC ile tam ekrandan çıkılınca modal da kapansın
-  // Ayrıca tam ekrandayken sağ tık engelle
+  // Tam ekrandan çıkıldığında modal açık kalsın; ilerlemeyi kaydet
   useEffect(() => {
     if (!open) return
 
-    const handleFullscreenChange = () => {
-      const isFullscreen = !!document.fullscreenElement
-
-      if (!isFullscreen) {
-        // Tam ekrandan çıkıldı (ESC veya buton) → modal'ı kapat
-        closePlayer()
-      } else {
-        // Tam ekrana girildi → sağ tık engelle
-        const blockContext = (e) => e.preventDefault()
-        document.addEventListener('contextmenu', blockContext)
-        const cleanup = () => {
-          document.removeEventListener('contextmenu', blockContext)
-          document.removeEventListener('fullscreenchange', cleanup)
-        }
-        document.addEventListener('fullscreenchange', cleanup)
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) {
+        persistContinueProgress()
       }
     }
 
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [open, onClose, lastEvent, continueMeta])
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [open, persistContinueProgress])
 
   useEffect(() => {
     if (!open) return undefined
@@ -237,6 +246,10 @@ const PlayerModal = ({
     [mediaType, tmdbId, season, episode, startTime, resumeTime]
   )
 
+  useEffect(() => {
+    if (!open) return
+    setPlayerNotFound(false)
+  }, [open, src])
 
   if (!open) return null
 
@@ -298,11 +311,12 @@ const PlayerModal = ({
               frameBorder='0'
               allowFullScreen
               referrerPolicy='no-referrer-when-downgrade'
+              onError={() => setPlayerNotFound(true)}
             />
           )}
         </div>
 
-        {lastEvent && (
+        {import.meta.env.DEV && lastEvent && (
           <div className='player-modal__event'>
             <p>
               Son olay: <strong>{lastEvent.event}</strong> • İlerleme: % {lastEvent.progress?.toFixed?.(1)}
